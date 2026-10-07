@@ -1,8 +1,8 @@
 # Tax Return Status Tracker
 
-A lightweight, single-database web application for tracking the workflow status
-of tax returns through a review process — from document collection all the way
-to e-file confirmation. Built with Flask and SQLite, designed for small firms or
+A lightweight, single-database web application for tracking the status
+of tax returns through not started all the way completion via e-file
+confirmation. Built with Flask and SQLite and designed for small firms or
 teams that want a shared checklist-style tracker with a full audit trail.
 
 ## Features
@@ -25,7 +25,7 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ## Supported Return Types
 
-1040, 1041, 1065, 1120, 1120-S, 990, 990-T, 706, 709, State, Other
+1040, 1041, 1065, 1120, 1120-S, 990, 990-PF, 990-T, 706, 709, State, Other
 
 ## Project Structure
 
