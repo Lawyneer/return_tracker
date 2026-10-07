@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Tax Return Tracker{% endblock %}</title>
+  {# Pick the stylesheet matching the user's saved theme preference #}
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/' ~ theme ~ '.css') }}">
+</head>
+<body>
+<nav>
+  <span><strong>Tax Return Tracker</strong></span>
+  <a href="{{ url_for('returns.index') }}">All Returns</a>
+  {% if username %}
+  <a href="{{ url_for('returns.new_return') }}">+ Add Return</a>
+  <a href="{{ url_for('returns.export_csv') }}">Export Active Returns (CSV)</a>
+  <a href="{{ url_for('auth.toggle_theme') }}">
+    {{ 'Dark mode' if theme == 'light' else 'Light mode' }}
+  </a>
+  <a href="{{ url_for('auth.logout') }}" style="float:right">
+    Signed in as {{ username }} (log out)
+  </a>
+  {% else %}
+  <a href="{{ url_for('auth.toggle_theme') }}">
+    {{ 'Dark mode' if theme == 'light' else 'Light mode' }}
+  </a>
+  {% endif %}
+</nav>
+<div class="wrap">
+  {# Flash messages (confirmations/errors) shown on every page #}
+  {% with msgs = get_flashed_messages() %}
+    {% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>

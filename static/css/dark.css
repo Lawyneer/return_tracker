@@ -1,0 +1,38 @@
+ body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
+        background: #000000; color: #d8d8e0; }
+ .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+ h1 { font-size: 22px; color: #ffffff; }
+ h2 { font-size: 17px; color: #f0f0f0; }
+ a { color: #6cb5ff; }
+ a:visited { color: #6cb5ff; }
+ a:hover { color: #9fd0ff; }
+ nav { background: #0d0d0d; padding: 10px 20px; color: #fff;
+       border-bottom: 1px solid #262626; }
+ nav a, nav span { color: #fff; margin-right: 15px; text-decoration: none; }
+ nav a:hover { text-decoration: underline; }
+ nav a:visited { color: #fff; }
+ table { border-collapse: collapse; width: 100%; background: #101010;
+         box-shadow: 0 1px 3px rgba(0,0,0,.8); }
+ th, td { padding: 8px 10px; border-bottom: 1px solid #262626; text-align: left;
+          font-size: 14px; }
+ th { background: #161616; color: #f0f0f0; }
+ tr.overdue td { background: #1f0f0a; }
+ tr.archived td { opacity: 0.6; }
+ .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+          background: #c8c8d0; font-size: 13px; color: #000000; }
+ .flash { padding: 8px 12px; background: #10241a; border: 1px solid #1e3a2a;
+          margin-bottom: 10px; border-radius: 4px; color: #b0ffc0; }
+ form.inline { display: inline; }
+ input, select { padding: 6px 10px; margin: 2px 0; background: #161616;
+                  border: 1px solid #303030; color: #d8d8e0; }
+ label { font-size: 13px; display: block; margin-top: 8px; color: #aaa; }
+ button { padding: 6px 14px; cursor: pointer; background: #1e1e28;
+          border: 1px solid #3a3a4a; color: #fff; border-radius: 4px; }
+ button:hover { background: #2a2a38; }
+ .dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+ .status-card { background: #101010; padding: 10px 14px; border-radius: 6px;
+                min-width: 120px; text-align: center; border: 1px solid #262626; }
+ .status-card .count { font-size: 24px; font-weight: bold; color: #fff; }
+ .status-card .label { font-size: 12px; margin-top: 4px; color: #999; }
+ .status-card.active { border-left: 4px solid #4a9eff; }
+ .status-card.archived { border-left: 4px solid #8866aa; }

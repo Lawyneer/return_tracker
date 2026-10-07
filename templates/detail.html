@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ r['return_name'] }} — Tax Return Tracker{% endblock %}
+{% block content %}
+<h1>{{ r['return_name'] }} — {{ r['tax_year'] }} {{ r['return_type'] }}</h1>
+<p><span class="badge" style="background: {{ r['stage_order']|status_color }}">{{ r['status'] }}</span>
+   {% if r['archived_at'] %}<em>(Archived {{ r['archived_at'] }})</em>{% endif %}</p>
+<p><strong>Due date:</strong> {{ r['due_date'] or '—' }}
+   <strong>Extended:</strong> {{ r['extended_due_date'] or '—' }}</p>
+
+<h2>Change status</h2>
+<form method="post">
+  <input type="hidden" name="action" value="change_status">
+  <select name="new_status_id">
+    {% for s in statuses %}
+    <option value="{{ s['id'] }}">{{ s['label'] }}</option>
+    {% endfor %}
+  </select>
+  <input name="note" placeholder="Optional note" size="40">
+  <button type="submit">Update Status</button>
+</form>
+
+<h2>Edit due dates</h2>
+<form method="post">
+  <input type="hidden" name="action" value="update_dates">
+  <label>Due date</label>
+  <input name="due_date" value="{{ r['due_date'] or '' }}" placeholder="YYYY-MM-DD">
+  <label>Extended due date</label>
+  <input name="extended_due_date" value="{{ r['extended_due_date'] or '' }}" placeholder="YYYY-MM-DD">
+  <p><button type="submit">Save Dates</button></p>
+</form>
+
+<h2>Status history</h2>
+<table>
+<tr><th>When</th><th>Changed by</th><th>From</th><th>To</th><th>Note</th></tr>
+{% for h in history %}
+<tr>
+  <td>{{ h['changed_at'] }}</td>
+  <td>{{ h['username'] }}</td>
+  <td>{{ h['old_status'] or '(created)' }}</td>
+  <td>{{ h['new_status'] }}</td>
+  <td>{{ h['note'] or '' }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Danger zone</h2>
+{# Soft delete: hides the return but preserves its full history #}
+<form method="post" action="{{ url_for('returns.archive_return', return_id=r['id']) }}"
+      onsubmit="return confirm('Archive {{ r['return_name']|e }} ({{ r['tax_year'] }} {{ r['return_type'] }})? Its full status history is preserved and it can be restored later.');">
+  {% if r['archived_at'] %}
+  <input type="hidden" name="archive_action" value="unarchive">
+  <button type="submit">Restore this return to active</button>
+  {% else %}
+  <input type="hidden" name="archive_action" value="archive">
+  <button type="submit"
+          style="background:#8a6d3b; color:#fff; border:none; padding:8px 16px; border-radius:4px;">
+    Archive this return
+  </button>
+  {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Login — Tax Return Tracker{% endblock %}
+{% block content %}
+<h1>Tax Return Status Tracker</h1>
+<h2>Select your name</h2>
+<form method="post">
+  <input type="hidden" name="action" value="login">
+  <select name="user_id">
+    <option value="">-- choose user --</option>
+    {% for u in users %}
+    <option value="{{ u['id'] }}">{{ u['username'] }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Sign in</button>
+</form>
+<h2>Add a new user</h2>
+<form method="post">
+  <input type="hidden" name="action" value="add_user">
+  <input name="new_username" placeholder="Name">
+  <button type="submit">Add</button>
+</form>
+{% endblock %}
