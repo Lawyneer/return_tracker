@@ -1,7 +1,7 @@
 """Domain constants shared across modules."""
 
 # Allowed return types offered in the "Add Return" form.
-RETURN_TYPES = ["1040", "1041", "1065", "1120", "1120-S", "990", "990-T", "706", "709", "State", "Other"]
+RETURN_TYPES = ["1040", "1041", "1065", "1120", "1120-S", "990", "990-PF", "990-T", "706", "709", "State", "Other"]
 
 # Workflow statuses: (code, human-readable label, pipeline stage order).
 # stage_order drives sorting and the red->green badge coloring.
