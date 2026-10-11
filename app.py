@@ -26,8 +26,7 @@ def create_app(config_object=Config):
     return app
 
 
-app = create_app()
-
 if __name__ == "__main__":
+    app = create_app()
     # host="0.0.0.0" makes it reachable from other machines on your LAN.
     app.run(host="0.0.0.0", port=5000, debug=False)

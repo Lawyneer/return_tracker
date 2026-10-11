@@ -1,5 +1,7 @@
 # Tax Return Status Tracker
 
+[![CI](https://github.com/Lawyneer/return_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Lawyneer/return_tracker/actions/workflows/ci.yml)
+
 A lightweight, single-database web application for tracking the status
 of tax returns through not started all the way completion via e-file
 confirmation. Built with Flask and SQLite and designed for small firms or
@@ -20,6 +22,8 @@ teams that want a shared checklist-style tracker with a full audit trail.
 - **Filtering & search** — filter by status, return type, or search by name
 - **CSV export** — download active or archived returns as a spreadsheet
 - **Dual themes** — dark mode (default) and light mode
+- **Tested** — pytest suite covering login, the status-change audit trail,
+  archiving, filtering, and CSV export, run automatically in CI
 - **Zero external services** — single SQLite database file, no server setup,
   no accounts or passwords to manage
 
@@ -30,14 +34,10 @@ teams that want a shared checklist-style tracker with a full audit trail.
 ## Project Structure
 
 ```text
-tax_tracker/
-├── app.py               # Application factory + entry point
-├── config.py            # Configuration (secret key, DB path)
-├── constants.py         # Return types and workflow status definitions
-├── db.py                # SQLite connection handling & schema
-├── helpers.py           # Shared utilities, template context, Jinja filters
-├── auth.py              # Blueprint: login / logout / theme toggle
-├── returns.py           # Blueprint: return CRUD, archive, CSV export
+return_tracker/
+├── .github/
+│   └── workflows/
+│       └── ci.yml          # GitHub Actions: pytest on Python 3.10–3.12
 ├── templates/
 │   ├── base.html
 │   ├── login.html
@@ -48,14 +48,31 @@ tax_tracker/
 │   └── css/
 │       ├── dark.css
 │       └── light.css
-└── tax_returns.db        # SQLite database (created on first run)
+├── tests/
+│   ├── conftest.py         # Shared fixtures (temp database, client, user)
+│   ├── test_auth.py        # Login flow, access control, theme toggle
+│   ├── test_returns.py     # Creation, validation, status changes, history
+│   └── test_dashboard_archive_export.py
+├── app.py                  # Application factory + entry point
+├── auth.py                  # Blueprint: login / logout / theme toggle
+├── config.py                # Configuration (secret key, DB path)
+├── constants.py             # Return types and workflow status definitions
+├── db.py                    # SQLite connection handling & schema
+├── helpers.py               # Shared utilities, template context, Jinja filters
+├── returns.py               # Blueprint: return CRUD, archive, CSV export
+├── .gitattributes           # Line-ending normalization; DB treated as binary
+├── CONTRIBUTING.md          # How to contribute
+├── pytest.ini               # Test runner configuration
+├── requirements.txt         # Runtime dependencies
+├── requirements-dev.txt     # Development dependencies (pytest)
+└── tax_returns.db           # SQLite database (created on first run, not committed)
 ```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.10+
 - Flask
 
 ### Setup
@@ -79,11 +96,11 @@ source venv/bin/activate
 **2. Install dependencies**
 
 ```bash
-pip install flask
+pip install -r requirements.txt
 ```
 
-(Or create a `requirements.txt` containing `flask` and run
-`pip install -r requirements.txt`.)
+(For development, also install the test dependencies — see
+[Testing](#testing) below.)
 
 **3. Run the app**
 
@@ -107,6 +124,29 @@ deactivate
 2. Select your name from the dropdown and sign in
 3. Click **+ Add Return** to create your first tax return
 4. Open a return to change its status, add notes, or edit due dates
+
+## Testing
+
+The test suite uses pytest with an isolated, throwaway SQLite database per
+test — your local `tax_returns.db` is never touched.
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+The suite covers the login flow, return creation and validation, the full
+status-change audit trail (who, when, and any note), backward status moves,
+dashboard counting, archiving/restoring, filtering, and CSV export.
+
+CI runs the suite on Python 3.10–3.12 for every push and pull request —
+see the badge at the top of this page.
+
+## Contributing
+
+Bug reports, feature ideas, and pull requests are welcome! See
+[CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, coding
+guidelines, and the pull-request checklist.
 
 ## Configuration
 
