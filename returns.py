@@ -6,6 +6,7 @@ import sqlite3
 from flask import (Blueprint, request, redirect, url_for,
                    flash, render_template, send_file)
 
+from constants import KANBAN_COLUMNS
 from helpers import current_user_id, parse_date
 from db import get_db
 
@@ -26,9 +27,6 @@ def index():
     search = request.args.get("q", "").strip()
     show_archived = request.args.get("archived") == "1"
 
-    # Base query includes each return's effective due date (extended date
-    # overriding the original) and the most recent history entry that has
-    # a note attached, to show "last note" on the list.
     sql = """
         SELECT r.id, r.return_name, r.tax_year, r.return_type,
                r.due_date, r.extended_due_date, r.archived_at,
@@ -44,13 +42,10 @@ def index():
         WHERE 1=1
     """
     params = []
-
-    # Scope: archived or active returns.
     if show_archived:
         sql += " AND r.archived_at IS NOT NULL"
     else:
         sql += " AND r.archived_at IS NULL"
-
     if status_filter:
         sql += " AND r.current_status_id = ?"
         params.append(status_filter)
@@ -83,6 +78,66 @@ def index():
                            status_filter=status_filter, type_filter=type_filter,
                            search=search, show_archived=show_archived,
                            counts=counts)
+
+# ---------------------------- board (kanban) ------------------------------------
+
+@returns_bp.route("/board")
+def board():
+    """Kanban board: active returns grouped into four workflow columns
+    (Not Started, Preparing, In Review, Completed) with per-column
+    counts, filterable by return type and name search."""
+    if current_user_id() is None:
+        return redirect(url_for("auth.login"))
+    db = get_db()
+    type_filter = request.args.get("type", "").strip()
+    search = request.args.get("q", "").strip()
+    show_archived = request.args.get("archived") == "1"
+
+    sql = """
+        SELECT r.id, r.return_name, r.tax_year, r.return_type,
+               r.due_date, r.extended_due_date, r.archived_at,
+               s.label AS status, s.stage_order, s.code AS status_code,
+               COALESCE(NULLIF(r.extended_due_date,''), r.due_date) AS effective_due,
+               lastsh.note AS last_note, lastsh.changed_at AS last_note_at
+        FROM tax_returns r
+        JOIN statuses s ON s.id = r.current_status_id
+        LEFT JOIN status_history lastsh ON lastsh.id =
+            (SELECT sh.id FROM status_history sh
+             WHERE sh.return_id = r.id AND sh.note IS NOT NULL
+             ORDER BY sh.id DESC LIMIT 1)
+        WHERE 1=1
+    """
+    params = []
+    if show_archived:
+        sql += " AND r.archived_at IS NOT NULL"
+    else:
+        sql += " AND r.archived_at IS NULL"
+    if type_filter:
+        sql += " AND r.return_type = ?"
+        params.append(type_filter)
+    if search:
+        sql += " AND r.return_name LIKE ? COLLATE NOCASE"
+        params.append(f"%{search}%")
+    sql += " ORDER BY s.stage_order, r.return_name COLLATE NOCASE"
+    returns = db.execute(sql, params).fetchall()
+
+    # Bucket returns into the four kanban columns. Counts derive from
+    # the (possibly filtered) result set so the header badges stay
+    # accurate while a filter or search is active.
+    columns = []
+    for col_title, status_codes in KANBAN_COLUMNS:
+        col_returns = [r for r in returns if r["status_code"] in status_codes]
+        columns.append({
+            "title": col_title,
+            "count": len(col_returns),
+            "returns": col_returns,
+        })
+
+    today = datetime.date.today().isoformat()
+
+    return render_template("board.html", returns=returns, today=today,
+                           type_filter=type_filter, search=search,
+                           show_archived=show_archived, columns=columns)
 
 
 # ---------------------------- add return -----------------------------------
@@ -212,15 +267,14 @@ def archive_return(return_id):
         with db:
             db.execute("UPDATE tax_returns SET archived_at=NULL WHERE id=?",
                        (return_id,))
-        flash(f"Restored return: {row['return_name']}.")
-        # Stay in whichever view the user was in.
-        return redirect(url_for("returns.index", archived="1" if False else None))
+        # No flash on restore; go straight to the detail page
+        return redirect(url_for("returns.return_detail", return_id=return_id))
     else:
         with db:
             db.execute("UPDATE tax_returns SET archived_at=CURRENT_TIMESTAMP WHERE id=?",
                        (return_id,))
-        flash(f"Archived return: {row['return_name']}.")
-        return redirect(url_for("returns.index", archived="1"))
+        # No flash on archive; go back to the active list
+        return redirect(url_for("returns.index"))
 
 
 # ---------------------------- CSV export ------------------------------------

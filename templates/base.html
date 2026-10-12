@@ -11,6 +11,7 @@
 <nav>
   <span><strong>Tax Return Tracker</strong></span>
   <a href="{{ url_for('returns.index') }}">All Returns</a>
+  <a href="{{ url_for('returns.board') }}">Kanban Board</a>
   {% if username %}
   <a href="{{ url_for('returns.new_return') }}">+ Add Return</a>
   <a href="{{ url_for('returns.export_csv') }}">Export Active Returns (CSV)</a>

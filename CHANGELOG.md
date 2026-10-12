@@ -8,6 +8,43 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-12
+
+### Added
+- Kanban workflow board at `/board`, linked from the nav bar as "Workflow
+  Board". Active (or archived) returns are grouped into four columns —
+  Not Started, Preparing, In Review, Completed — with a per-column count
+  in each header, clickable cards linking to the return detail page, and
+  the same return-type filter and name search as the list view. Column
+  membership is defined by `KANBAN_COLUMNS` in `constants.py`. No
+  drag-and-drop: status changes still happen from the return detail page.
+- `tests/test_board.py` covering the board's login requirement, column
+  rendering and empty state, the full status-to-column mapping, archive
+  scoping, and the type/name filters.
+- Test coverage for the newly changed behaviors: the pre-selected status
+  dropdown, note-only status updates, silent archive/restore redirects,
+  the styled Cancel button, and a drift guard verifying every status in
+  `constants.py` is seeded into the database.
+
+### Changed
+- The status dropdown on the return detail page now pre-selects the
+  return's current status, so a note can be recorded without re-picking
+  the status first. Submitting without changing the selection logs a
+  same-status history entry carrying the note.
+- Archiving and restoring are now silent: the confirmation flash messages
+  and the JavaScript `confirm()` dialog were removed. Archiving returns
+  to the active list; restoring a return now opens its detail page
+  (previously it returned to the list). The "Return not found" error
+  flash remains.
+- Buttons now inherit the page font, and the Cancel link on the New
+  Return page is styled to match the adjacent submit button (equal
+  height, font size, and white text in dark mode) with all link states
+  (`:visited`, `:hover`) explicitly styled.
+
+### Fixed
+- The return type dropdown on the New Return page listed "Other" twice
+  (once from the `RETURN_TYPES` loop, once hardcoded in the template).
+
 ## [1.1.0] - 2026-10-11
 
 ### Added
@@ -70,6 +107,7 @@ and this project adheres to
   default.
 - Passwordless, name-based login suitable for trusted internal networks.
 
-[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Lawyneer/return_tracker/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.0.0

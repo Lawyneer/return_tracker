@@ -15,6 +15,9 @@ teams that want a shared checklist-style tracker with a full audit trail.
 - **Full status history** — every status change is timestamped, attributed to a
   user, and optionally annotated with a note
 - **Dashboard overview** — at-a-glance count of returns in each workflow stage
+- **Kanban workflow board** — a board view grouping active returns into
+  four columns (Not Started, Preparing, In Review, Completed) with
+  per-column counts, filterable by return type and searchable by name
 - **Overdue highlighting** — returns past their effective due date (extended due
   date if set) are flagged automatically
 - **Soft archiving** — completed returns can be archived and later restored,
@@ -40,6 +43,7 @@ return_tracker/
 │       └── ci.yml          # GitHub Actions: pytest on Python 3.10–3.12
 ├── templates/
 │   ├── base.html
+│   ├── board.html
 │   ├── login.html
 │   ├── index.html
 │   ├── new_return.html
@@ -51,7 +55,8 @@ return_tracker/
 ├── tests/
 │   ├── conftest.py         # Shared fixtures (temp database, client, user)
 │   ├── test_auth.py        # Login flow, access control, theme toggle
-│   ├── test_returns.py     # Creation, validation, status changes, history
+│   ├── test_returns.py     # Creation, validation, status changes, history, form details
+│   ├── test_board.py       # Kanban board: columns, counts, filters
 │   └── test_dashboard_archive_export.py
 ├── app.py                  # Application factory + entry point
 ├── auth.py                  # Blueprint: login / logout / theme toggle
@@ -124,6 +129,8 @@ deactivate
 2. Select your name from the dropdown and sign in
 3. Click **+ Add Return** to create your first tax return
 4. Open a return to change its status, add notes, or edit due dates
+5. Click **Workflow Board** in the nav bar for the four-column kanban
+   overview of where every return stands
 
 ## Testing
 
@@ -137,7 +144,8 @@ pytest
 
 The suite covers the login flow, return creation and validation, the full
 status-change audit trail (who, when, and any note), backward status moves,
-dashboard counting, archiving/restoring, filtering, and CSV export.
+dashboard counting, the kanban board's column grouping and count, archiving/
+restoring, filtering, and CSV export.
 
 CI runs the suite on Python 3.10–3.12 for every push and pull request —
 see the badge at the top of this page.

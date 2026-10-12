@@ -9,14 +9,13 @@
   <input name="tax_year" placeholder="e.g. 2025" required>
   <label>Return type</label>
   <select name="return_type">
-    {% for t in return_types %}<option>{{ t }}</option>{% endfor %}
-    <option>Other</option>
+    {% for t in return_types %}<option>{{ t }}</option>{% endfor %}    
   </select>
   <label>Due date (YYYY-MM-DD or MM/DD/YYYY)</label>
   <input name="due_date" placeholder="e.g. 04/15/2026">
   <label>Extended due date</label>
   <input name="extended_due_date" placeholder="e.g. 10/15/2026">
-  <p><button type="submit">Add Return</button>
-     <a href="{{ url_for('returns.index') }}">Cancel</a></p>
+    <p><button type="submit">Add Return</button>
+     <a href="{{ url_for('returns.index') }}" class="btn-cancel">Cancel</a></p>
 </form>
 {% endblock %}

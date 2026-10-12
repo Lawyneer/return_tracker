@@ -24,7 +24,11 @@ body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
  form.inline { display: inline; }
  input, select { padding: 6px 10px; margin: 2px 0; }
  label { font-size: 13px; display: block; margin-top: 8px; }
- button { padding: 6px 14px; cursor: pointer; }
+button { padding: 6px 14px; cursor: pointer; background: #fff;
+          border: 1px solid #ccc; color: #222; border-radius: 4px;
+          font: inherit; font-size: 14px; line-height: 1.2;
+          vertical-align: middle; }
+button:hover { background: #eaeaea; }
  .dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
  .status-card { background: #fff; padding: 10px 14px; border-radius: 6px;
                 min-width: 120px; text-align: center; border: 1px solid #ddd; }
@@ -32,3 +36,33 @@ body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
  .status-card .label { font-size: 12px; margin-top: 4px; color: #777; }
  .status-card.active { border-left: 4px solid #4a9eff; }
  .status-card.archived { border-left: 4px solid #8866aa; }
+
+/* ---- Kanban board ---- */
+.kanban { display: flex; gap: 12px; align-items: flex-start;
+          margin-top: 1em; overflow-x: auto; }
+.kanban-col { flex: 1 1 0; min-width: 240px; background: #fff;
+              border: 1px solid #ddd; border-radius: 6px; padding: 8px;
+              box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.kanban-col-header { display: flex; justify-content: space-between;
+                     align-items: center; font-weight: bold;
+                     border-bottom: 1px solid #ddd; padding-bottom: 6px;
+                     margin-bottom: 8px; }
+.kanban-count { background: #dfe6f5; color: #333; border-radius: 10px;
+                min-width: 22px; text-align: center; padding: 1px 7px;
+                font-size: 0.85em; }
+.kanban-card { background: #f9fafb; border: 1px solid #ddd;
+               border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+.kanban-card.overdue { border-color: #cc2222; border-left: 4px solid #cc2222; }
+.kanban-overdue-flag { color: #cc2222; font-weight: bold; margin-top: 4px; }
+.kanban-due, .kanban-card-meta, .kanban-note { font-size: 0.85em; margin-top: 4px;
+                                                color: #777; }
+.kanban-empty { color: #999; font-size: 0.85em; padding: 8px 2px; }
+
+/* ---- Cancel button (styled like adjacent <button>) ---- */
+.btn-cancel, .btn-cancel:visited, .btn-cancel:hover {
+  display: inline-block; padding: 6px 14px; margin-left: 8px;
+  background: #fff; border: 1px solid #ccc; color: #222;
+  border-radius: 4px; text-decoration: none; cursor: pointer;
+  font: inherit; font-size: 14px; line-height: 1.2;
+  vertical-align: middle; }
+.btn-cancel:hover { background: #eaeaea; color: #222; }

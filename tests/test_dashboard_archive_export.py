@@ -1,4 +1,4 @@
-"""Dashboard counts, archiving, and CSV export."""
+"""Dashboard counts, archiving, restoring, and CSV export."""
 from tests.conftest import add_return, return_id, status_id
 
 
@@ -45,6 +45,37 @@ def test_archive_then_restore(alice, client, db):
                 data={"archive_action": "unarchive"},
                 follow_redirects=True)
     assert b"Acme Corp" in client.get("/").data
+
+
+def test_archive_is_silent_and_returns_to_index(alice, client, db):
+    """Archiving shows no confirmation flash and lands on the index."""
+    add_return(client, name="Quiet Corp")
+    rid = return_id(db, "Quiet Corp")
+
+    response = client.post(f"/returns/{rid}/archive",
+                           data={"archive_action": "archive"},
+                           follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Archived return" not in response.data   # no confirmation flash
+    assert b"Quiet Corp" not in response.data         # landed on active index
+
+
+def test_restore_is_silent_and_opens_detail_page(alice, client, db):
+    """Restoring shows no confirmation flash and lands on the detail
+    page for the restored return."""
+    add_return(client, name="Quiet Corp")
+    rid = return_id(db, "Quiet Corp")
+    client.post(f"/returns/{rid}/archive",
+                data={"archive_action": "archive"},
+                follow_redirects=True)
+
+    response = client.post(f"/returns/{rid}/archive",
+                           data={"archive_action": "unarchive"},
+                           follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Restored return" not in response.data   # no confirmation flash
+    assert b"Status history" in response.data        # landed on detail page
+    assert b"Quiet Corp" in response.data
 
 
 def test_csv_export_contains_rows(alice, client):

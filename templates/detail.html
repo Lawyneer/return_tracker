@@ -12,7 +12,9 @@
   <input type="hidden" name="action" value="change_status">
   <select name="new_status_id">
     {% for s in statuses %}
-    <option value="{{ s['id'] }}">{{ s['label'] }}</option>
+    <option value="{{ s['id'] }}"
+            {% if s['id'] == r['current_status_id'] %}selected{% endif %}>
+      {{ s['label'] }}</option>
     {% endfor %}
   </select>
   <input name="note" placeholder="Optional note" size="40">
@@ -45,8 +47,7 @@
 
 <h2>Danger zone</h2>
 {# Soft delete: hides the return but preserves its full history #}
-<form method="post" action="{{ url_for('returns.archive_return', return_id=r['id']) }}"
-      onsubmit="return confirm('Archive {{ r['return_name']|e }} ({{ r['tax_year'] }} {{ r['return_type'] }})? Its full status history is preserved and it can be restored later.');">
+<form method="post" action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
   {% if r['archived_at'] %}
   <input type="hidden" name="archive_action" value="unarchive">
   <button type="submit">Restore this return to active</button>

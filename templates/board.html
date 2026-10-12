@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Board — Tax Return Tracker{% endblock %}
+{% block content %}
+<h1>{{ 'Archived Tax Returns' if show_archived else 'Workflow Board' }}</h1>
+{% if show_archived %}
+  <p><a href="{{ url_for('returns.board') }}">&larr; Back to active board</a></p>
+{% else %}
+  <p><a href="{{ url_for('returns.board', archived=1) }}">Show archived returns</a></p>
+{% endif %}
+
+<form method="get" class="inline">
+  {% if show_archived %}<input type="hidden" name="archived" value="1">{% endif %}
+  <select name="type">
+    <option value="">All types</option>
+    {% for t in return_types %}
+    <option value="{{ t }}" {% if t == type_filter %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <input name="q" placeholder="Search by name" value="{{ search }}">
+  <button type="submit">Filter</button>
+</form>
+
+<div class="kanban">
+  {% for col in columns %}
+  <section class="kanban-col">
+    <header class="kanban-col-header">
+      <span class="kanban-col-title">{{ col.title }}</span>
+      <span class="kanban-count">{{ col.count }}</span>
+    </header>
+    {% for r in col.returns %}
+    <div class="kanban-card {{ 'overdue' if r['effective_due'] and r['effective_due'] < today }}">
+      <a class="kanban-card-name"
+         href="{{ url_for('returns.return_detail', return_id=r['id']) }}">
+        <strong>{{ r['return_name'] }}</strong>
+      </a>
+      <div class="kanban-card-meta">{{ r['tax_year'] }} · {{ r['return_type'] }}</div>
+      <span class="badge" style="background: {{ r['stage_order']|status_color }}">
+        {{ r['status'] }}
+      </span>
+      {% if r['effective_due'] and r['effective_due'] < today %}
+        <div class="kanban-overdue-flag">OVERDUE {{ r['effective_due'] }}</div>
+      {% elif r['effective_due'] %}
+        <div class="kanban-due">Due {{ r['effective_due'] }}</div>
+      {% endif %}
+      {% if r['last_note'] %}
+      <div class="kanban-note" title="Noted {{ r['last_note_at'] or '' }}">
+        {{ r['last_note'] }}
+      </div>
+      {% endif %}
+      {% if show_archived %}
+      <form method="post" class="inline"
+            action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
+        <input type="hidden" name="archive_action" value="unarchive">
+        <button type="submit">Restore</button>
+      </form>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="kanban-empty">No returns</div>
+    {% endfor %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

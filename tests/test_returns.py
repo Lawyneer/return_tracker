@@ -1,5 +1,14 @@
 """Return lifecycle: creation, validation, status changes, history."""
+import re
+
 from tests.conftest import add_return, return_id, status_id
+
+
+def test_all_constants_statuses_seeded(alice, db):
+    """Drift guard: every status in constants.py must exist in the DB."""
+    from constants import STATUSES
+    for code, label, _order in STATUSES:
+        assert status_id(db, code) is not None, f"missing seeded status: {code}"
 
 
 def test_create_return_shows_in_list(alice, client):
@@ -35,7 +44,7 @@ def test_missing_fields_are_rejected(alice, client, db):
 def test_status_change_logs_history(alice, client, db):
     add_return(client)
     rid = return_id(db)
-    new_status = status_id(db, "waiting_on_documents")
+    new_status = status_id(db, "docs_waiting")
 
     client.post(f"/returns/{rid}",
                 data={"action": "change_status",
@@ -54,11 +63,49 @@ def test_status_change_logs_history(alice, client, db):
     assert history["changed_by"] == alice
 
 
+def test_detail_preselects_current_status(alice, client, db):
+    """The dropdown defaults to the return's current status, so a
+    note-only update doesn't require re-picking the status."""
+    add_return(client)
+    rid = return_id(db)
+    target = status_id(db, "with_reviewer")
+
+    client.post(f"/returns/{rid}",
+                data={"action": "change_status",
+                      "new_status_id": str(target)},
+                follow_redirects=True)
+
+    page = client.get(f"/returns/{rid}")
+    assert re.search(rb'<option value="%d"\s+selected' % target, page.data)
+
+
+def test_note_only_update_records_history_entry(alice, client, db):
+    """Submitting the pre-selected status with just a note logs a
+    same-status history entry carrying the note."""
+    add_return(client)
+    rid = return_id(db)
+    current = status_id(db, "not_started")
+
+    client.post(f"/returns/{rid}",
+                data={"action": "change_status",
+                      "new_status_id": str(current),
+                      "note": "phone call re: missing W-2"},
+                follow_redirects=True)
+
+    history = db.execute("""SELECT old_status_id, new_status_id, note
+                            FROM status_history
+                            WHERE return_id = ? ORDER BY id DESC LIMIT 1""",
+                         (rid,)).fetchone()
+    assert history["old_status_id"] == current
+    assert history["new_status_id"] == current
+    assert history["note"] == "phone call re: missing W-2"
+
+
 def test_backward_status_moves_allowed(alice, client, db):
     add_return(client)
     rid = return_id(db)
     with_reviewer = status_id(db, "with_reviewer")
-    waiting = status_id(db, "waiting_on_documents")
+    waiting = status_id(db, "docs_waiting")
 
     client.post(f"/returns/{rid}",
                 data={"action": "change_status",
@@ -79,9 +126,9 @@ def test_invalid_status_id_rejected(alice, client, db):
     add_return(client)
     rid = return_id(db)
     response = client.post(f"/returns/{rid}",
-                           data={"action": "change_status",
-                                 "new_status_id": "9999"},
-                           follow_redirects=True)
+                data={"action": "change_status",
+                      "new_status_id": "9999"},
+                follow_redirects=True)
     assert b"Invalid status" in response.data
 
 
@@ -97,3 +144,18 @@ def test_type_filter(alice, client):
     response = client.get("/?type=1065")
     assert b"Partnership Two" in response.data
     assert b"Personal One" not in response.data
+
+
+def test_new_return_has_styled_cancel_button(alice, client):
+    """Smoke test: the Cancel link carries the btn-cancel styling hook."""
+    page = client.get("/returns/new")
+    assert b"btn-cancel" in page.data
+
+
+def test_new_return_form_has_single_other_option(alice, client):
+    """Guards against the duplicate 'Other' option (one from the
+    RETURN_TYPES loop, one hardcoded in the template). Requires the
+    extra <option>Other</option> line to have been removed from
+    new_return.html."""
+    page = client.get("/returns/new")
+    assert page.data.count(b"<option>Other</option>") == 1
