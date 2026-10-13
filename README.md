@@ -209,7 +209,7 @@ Before exposing it beyond a private LAN, consider:
 - Adding real password-based authentication
 - Serving over HTTPS
 
-Note that password authentication planned — see (CHANGELOG [Unreleased])
+Note that password authentication planned — see [Unreleased](CHANGELOG.md)
 
 ## License
 
