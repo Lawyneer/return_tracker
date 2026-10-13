@@ -34,13 +34,13 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ### Workflow Board (Kanban View)
 
-![Workflow Board](screenshots/main_page.png)
+![Workflow Board](screenshots/kanban.png)
 
 The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and name.
 
 ### Dashboard Overview
 
-![Dashboard Overview]((screenshots/kanban.png))
+![Dashboard Overview](screenshots/main_page.png)
 
 The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
 
