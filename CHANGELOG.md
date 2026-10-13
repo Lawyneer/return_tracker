@@ -8,6 +8,39 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Added
+- Bulk import of returns from a CSV file on a new "Import" page. The
+  import expects the same columns as the CSV export (Return Name, Tax
+  Year, Type, Due Date, Extended Due Date), so exported spreadsheets can
+  be edited and re-imported. Rows are validated individually: valid rows
+  are inserted, and a summary reports how many were imported, skipped as
+  duplicates, or rejected with the reason per row.
+- Assignment of returns to users. Each return has an assignee shown on
+  the list, board, and detail pages; the assignee can be changed when
+  updating a status (for example, handing a return from the preparer to
+  the reviewer when it moves to a review stage) or on its own. Every
+  assignment change is recorded in the status history with its
+  timestamp and the user who made the change.
+- Pipeline statistics page showing how long returns spend at each
+  workflow status, computed from the status history, plus counts of
+  returns moved per status by each user.
+- Database backup download, which produces a consistent snapshot of the
+  SQLite database using SQLite's online backup API, safe to run while
+  the app is serving requests.
+- Login rate limiting with temporary lockout after repeated failed
+  attempts from the same username.
+
+### Changed
+- Login now requires a password. Passwords are stored salted and hashed
+  (Werkzeug PBKDF2), never in plaintext; existing users are prompted to
+  set a password on first login after the upgrade.
+- CSV export now includes the assignee column.
+
+### Security
+- Added cross-site request forgery (CSRF) protection on all forms and
+  session-cookie hardening (`HttpOnly`, `SameSite=Lax`) in preparation
+  for internet-facing deployments.
+
 ## [1.2.0] - 2026-10-12
 
 ### Added
