@@ -209,6 +209,8 @@ Before exposing it beyond a private LAN, consider:
 - Adding real password-based authentication
 - Serving over HTTPS
 
+Note that password authentication planned — see CHANGELOG [Unreleased])
+
 ## License
 
 This project is licensed under the MIT License — see the
