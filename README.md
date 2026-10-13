@@ -30,6 +30,26 @@ teams that want a shared checklist-style tracker with a full audit trail.
 - **Zero external services** — single SQLite database file, no server setup,
   no accounts or passwords to manage
 
+## Screenshots
+
+### Workflow Board (Kanban View)
+
+![Workflow Board](screenshots/main_page.png)
+
+The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and name.
+
+### Dashboard Overview
+
+![Dashboard Overview]((screenshots/kanban.png))
+
+The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
+
+### Return Detail Page
+
+![Return Detail Page](screenshots/detail_page.png)
+
+Each return's detail page includes status change controls, due date editing, full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
+
 ## Supported Return Types
 
 1040, 1041, 1065, 1120, 1120-S, 990, 990-PF, 990-T, 706, 709, State, Other
