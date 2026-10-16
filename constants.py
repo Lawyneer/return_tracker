@@ -8,26 +8,21 @@ RETURN_TYPES = ["1040", "1041", "1065", "1120", "1120-S", "990", "990-PF", "990-
 STATUSES = [
     ("not_started",          "Not Started",                               1),
     ("docs_requested",       "Documents Requested",                       2),
-    ("prep_ready",           "Ready for Preparation",                     3),
-    ("with_preparer",        "In Preparation",                            4),
-    ("docs_waiting",         "Waiting on Documents",                      5),
-    ("with_reviewer",        "Return with Reviewer",                      6),
-    ("open_review_points",   "Open Review Points",                        7),
-    ("points_cleared",       "Review Points Cleared",                     8),
-    ("with_cri",             "With CRI",                                  9),
-    ("open_cri_points",      "Open CRI Points",                           10),
-    ("out_for_signatures",   "Out for Signatures",                       11),
-    ("eforms_received",      "E-File Forms Received",                     12),
-    ("complete",             "E-File Forms Uploaded - Complete",         13),
+    ("with_preparer",        "In Preparation",                            3),
+    ("docs_waiting",         "Waiting on Documents",                      4),
+    ("with_reviewer",        "With Reviewer",                             5),
+    ("with_or",              "With Outside Reviewer",                     6),
+    ("out_for_signatures",   "Out for Signatures",                        7),
+    ("eforms_received",      "E-File Forms Received",                     8),
+    ("complete",             "E-File Forms Uploaded - Complete",          9),
 ]
 
 # Kanban dashboard columns: (column title, status codes in that column).
 # Codes refer to the STATUSES tuples above.
 KANBAN_COLUMNS = [
-    ("Not Started", ["not_started", "docs_requested", "prep_ready"]),
-    ("Preparing",   ["with_preparer", "docs_waiting",
-                     "open_review_points", "open_cri_points"]),
-    ("In Review",   ["with_reviewer", "points_cleared", "with_cri"]),
+    ("Not Started", ["not_started", "docs_requested"]),
+    ("Preparing",   ["with_preparer", "docs_waiting"]),
+    ("In Review",   ["with_reviewer", "with_or"]),
     ("Completed",   ["out_for_signatures", "eforms_received", "complete"]),
 ]
 

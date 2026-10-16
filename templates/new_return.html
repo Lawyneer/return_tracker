@@ -15,7 +15,9 @@
   <input name="due_date" placeholder="e.g. 04/15/2026">
   <label>Extended due date</label>
   <input name="extended_due_date" placeholder="e.g. 10/15/2026">
-    <p><button type="submit">Add Return</button>
-     <a href="{{ url_for('returns.index') }}" class="btn-cancel">Cancel</a></p>
+  <label>Signer</label>
+  <input name="signer" size="40" placeholder="e.g. Jane Smith">
+  <p><button type="submit">Add Return</button>
+   <a href="{{ url_for('returns.index') }}" class="btn-cancel">Cancel</a></p>
 </form>
 {% endblock %}

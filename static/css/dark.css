@@ -33,11 +33,37 @@ body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
 button:hover { background: #2a2a38; }
  .dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
  .status-card { background: #101010; padding: 10px 14px; border-radius: 6px;
-                min-width: 120px; text-align: center; border: 1px solid #262626; }
+                min-width: 200px; text-align: center; border: 1px solid #262626; }
  .status-card .count { font-size: 24px; font-weight: bold; color: #fff; }
  .status-card .label { font-size: 12px; margin-top: 4px; color: #999; }
  .status-card.active { border-left: 4px solid #4a9eff; }
  .status-card.archived { border-left: 4px solid #8866aa; }
+ th.note-col, td.note-col {
+  width: 260px;
+  min-width: 160px;
+  max-width: 320px;
+}
+th.date-col, td.date-col {
+  width: 75px;
+  min-width: 50px;
+  max-width: 100px;
+}
+th.year-col, td.year-col {
+  width: 50px;
+  min-width: 50px;
+  max-width: 100px;
+}
+th.type-col, td.type-col {
+  width: 75px;
+  min-width: 50px;
+  max-width: 100px;
+}
+th.signer-col, td.signer-col {
+  width: 100px;
+  min-width: 50px;
+  max-width: 150px;
+}
+
 
 /* ---- Kanban board ---- */
 .kanban { display: flex; gap: 12px; align-items: flex-start;
@@ -58,6 +84,7 @@ button:hover { background: #2a2a38; }
 .kanban-due, .kanban-card-meta, .kanban-note { font-size: 0.85em; margin-top: 4px;
                                                 color: #999; }
 .kanban-empty { color: #777; font-size: 0.85em; padding: 8px 2px; }
+.kanban-card-signer { font-size: 0.85em; opacity: 0.8; }
 
 /* ---- Cancel button (styled like adjacent <button>) ---- */
 .btn-cancel, .btn-cancel:visited, .btn-cancel:hover {

@@ -61,3 +61,12 @@ def add_return(client, name="Acme Corp", year="2026", rtype="1120",
 def return_id(db, name="Acme Corp"):
     return db.execute("SELECT id FROM tax_returns WHERE return_name = ?",
                       (name,)).fetchone()["id"]
+
+def add_return(client, name="Acme Corp", year="2026", rtype="1120",
+               due="2026-04-15", ext="", signer="", noteless=False):
+    """Helper: create a return through the web form, return the response."""
+    return client.post("/returns/new",
+                       data={"return_name": name, "tax_year": year,
+                             "return_type": rtype, "due_date": due,
+                             "extended_due_date": ext, "signer": signer},
+                       follow_redirects=True)

@@ -9,24 +9,34 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ## Features
 
-- **13-stage workflow tracking** — statuses progress from "Not Started" through
-  document collection, preparer/reviewer stages, signature collection, filing,
-  and finally e-file confirmation
-- **Full status history** — every status change is timestamped, attributed to a
-  user, and optionally annotated with a note
+- **9-stage workflow tracking** — statuses progress from "Not Started" through
+  document collection, preparer/reviewer stages, signature collection, and filing.
+- **Signer tracking** — each return records a signer (set at creation or any
+  time later), shown on the list, board, and detail pages, filterable in both
+  views, and included in the CSV export
+- **Full audit trail** — every status change *and every signer or due-date
+  edit* is timestamped, attributed to a user, and labeled by change type,
+  with optional notes on status changes
 - **Dashboard overview** — at-a-glance count of returns in each workflow stage
 - **Kanban workflow board** — a board view grouping active returns into
   four columns (Not Started, Preparing, In Review, Completed) with
-  per-column counts, filterable by return type and searchable by name
+  per-column counts, filterable by return type and signer, searchable by name
 - **Overdue highlighting** — returns past their effective due date (extended due
   date if set) are flagged automatically
 - **Soft archiving** — completed returns can be archived and later restored,
   with history preserved
-- **Filtering & search** — filter by status, return type, or search by name
-- **CSV export** — download active or archived returns as a spreadsheet
+- **Filtering & search** — filter by status, return type, or signer, plus
+  search by name
+- **CSV export** — download active or archived returns as a spreadsheet,
+  including the signer
+- **CSV import** — bulk-add returns from a spreadsheet; only Return Name,
+  Tax Year, and Return Type are required (see
+  [CSV Import](#csv-import)); a ready-to-edit template ships with the repo
+  (`import_template.csv`)
 - **Dual themes** — dark mode (default) and light mode
-- **Tested** — pytest suite covering login, the status-change audit trail,
-  archiving, filtering, and CSV export, run automatically in CI
+- **Tested** — pytest suite covering login, the audit trail (status changes
+  and signer/due-date edits), signer handling, CSV import and export,
+  archiving, and filtering, run automatically in CI
 - **Zero external services** — single SQLite database file, no server setup,
   no accounts or passwords to manage
 
@@ -36,7 +46,7 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ![Workflow Board](screenshots/kanban.png)
 
-The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and name.
+The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and signer.
 
 ### Dashboard Overview
 
@@ -48,7 +58,7 @@ The dashboard provides at-a-glance status counts for each workflow stage, follow
 
 ![Return Detail Page](screenshots/detail_page.png)
 
-Each return's detail page includes status change controls, due date editing, full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
+Each return's detail page includes status change controls, due date and signer editing, the full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
 
 ## Supported Return Types
 
@@ -77,20 +87,22 @@ return_tracker/
 │   ├── test_auth.py        # Login flow, access control, theme toggle
 │   ├── test_returns.py     # Creation, validation, status changes, history, form details
 │   ├── test_board.py       # Kanban board: columns, counts, filters
-│   └── test_dashboard_archive_export.py
+│   ├── test_dashboard_archive_export.py
+│   └── test_signer_audit_import.py  # Signer field, change_type audit trail, CSV import
 ├── app.py                  # Application factory + entry point
-├── auth.py                  # Blueprint: login / logout / theme toggle
-├── config.py                # Configuration (secret key, DB path)
-├── constants.py             # Return types and workflow status definitions
-├── db.py                    # SQLite connection handling & schema
-├── helpers.py               # Shared utilities, template context, Jinja filters
-├── returns.py               # Blueprint: return CRUD, archive, CSV export
-├── .gitattributes           # Line-ending normalization; DB treated as binary
-├── CONTRIBUTING.md          # How to contribute
-├── pytest.ini               # Test runner configuration
-├── requirements.txt         # Runtime dependencies
-├── requirements-dev.txt     # Development dependencies (pytest)
-└── tax_returns.db           # SQLite database (created on first run, not committed)
+├── auth.py                 # Blueprint: login / logout / theme toggle
+├── config.py               # Configuration (secret key, DB path)
+├── constants.py            # Return types and workflow status definitions
+├── db.py                   # SQLite connection handling & schema
+├── helpers.py              # Shared utilities, template context, Jinja filters
+├── returns.py              # Blueprint: return CRUD, archive, CSV import/export
+├── import_template.csv     # Sample CSV for the bulk import
+├── .gitattributes          # Line-ending normalization; DB treated as binary
+├── CONTRIBUTING.md         # How to contribute
+├── pytest.ini              # Test runner configuration
+├── requirements.txt        # Runtime dependencies
+├── requirements-dev.txt    # Development dependencies (pytest)
+└── tax_returns.db          # SQLite database (created on first run, not committed)
 ```
 
 ## Getting Started
@@ -147,10 +159,38 @@ deactivate
 
 1. On the login page, add your name under **Add a new user**
 2. Select your name from the dropdown and sign in
-3. Click **+ Add Return** to create your first tax return
-4. Open a return to change its status, add notes, or edit due dates
+3. Click **+ Add Return** to create your first tax return (optionally with a
+   signer and due dates)
+4. Open a return to change its status, add notes, or edit due dates and the
+   signer
 5. Click **Workflow Board** in the nav bar for the four-column kanban
    overview of where every return stands
+6. Have a spreadsheet of returns ready? Use the CSV import on the main page
+
+## CSV Import
+
+The main list page includes an **Import CSV** control for bulk-adding returns.
+Columns are matched by header name, case and punctuation insensitive, and a
+UTF-8 BOM (typical of Excel exports) is handled automatically.
+
+Required columns:
+
+- **Return Name**
+- **Tax Year**
+- **Return Type**
+
+Optional columns:
+
+- **Due Date** / **Extended Due Date** — `YYYY-MM-DD` or `MM/DD/YYYY`
+- **Signer** — free text
+- **Status** — either the status code (`with_preparer`) or the label
+  (`In Preparation`); blank defaults to "Not Started"
+
+Rows are validated and committed individually: valid rows are inserted,
+rows duplicating an existing return (same name, year, and type) are skipped,
+and invalid rows are rejected with a reason. A summary at the top of the
+page reports the outcome. A starter template,
+[`import_template.csv`](import_template.csv), is included in the repo.
 
 ## Testing
 
@@ -195,7 +235,9 @@ copy that file while the app is stopped. To reset, delete the file — the schem
 and default statuses are recreated on next launch.
 
 Existing databases from earlier versions of this app are migrated
-automatically (an `archived_at` column is added if missing).
+automatically (`archived_at`, `signer`, and status-history `change_type`
+columns are added if missing; existing history rows are back-filled as
+status changes).
 
 ## Security Notes
 
@@ -209,7 +251,7 @@ Before exposing it beyond a private LAN, consider:
 - Adding real password-based authentication
 - Serving over HTTPS
 
-Note that password authentication planned — see [Unreleased](CHANGELOG.md)
+Note that password authentication is planned — see [Unreleased](CHANGELOG.md)
 
 ## License
 

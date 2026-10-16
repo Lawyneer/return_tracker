@@ -6,6 +6,7 @@
    {% if r['archived_at'] %}<em>(Archived {{ r['archived_at'] }})</em>{% endif %}</p>
 <p><strong>Due date:</strong> {{ r['due_date'] or '—' }}
    <strong>Extended:</strong> {{ r['extended_due_date'] or '—' }}</p>
+<p><strong>Signer:</strong> {{ r['signer'] or '—' }}</p>
 
 <h2>Change status</h2>
 <form method="post">
@@ -31,16 +32,26 @@
   <p><button type="submit">Save Dates</button></p>
 </form>
 
+<h2>Edit signer</h2>
+<form method="post">
+  <input type="hidden" name="action" value="update_signer">
+  <label>Signer name</label>
+  <input name="signer" value="{{ r['signer'] or '' }}" size="40"
+         placeholder="Enter signer name">
+  <p><button type="submit">Save Signer</button></p>
+</form>
+
 <h2>Status history</h2>
 <table>
-<tr><th>When</th><th>Changed by</th><th>From</th><th>To</th><th>Note</th></tr>
+<tr><th>When</th><th>Changed by</th><th>Change</th><th>From</th><th>To</th><th>Note</th></tr>
 {% for h in history %}
 <tr>
   <td>{{ h['changed_at'] }}</td>
   <td>{{ h['username'] }}</td>
+  <td>{{ change_labels.get(h['change_type'], 'Edit') }}</td>
   <td>{{ h['old_status'] or '(created)' }}</td>
   <td>{{ h['new_status'] }}</td>
-  <td>{{ h['note'] or '' }}</td>
+  <td class="note-col">{{ h['note'] or '' }}</td>
 </tr>
 {% endfor %}
 </table>

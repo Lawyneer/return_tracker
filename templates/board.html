@@ -16,6 +16,12 @@
     <option value="{{ t }}" {% if t == type_filter %}selected{% endif %}>{{ t }}</option>
     {% endfor %}
   </select>
+  <select name="signer">
+    <option value="">All signers</option>
+    {% for sg in distinct_signers %}
+    <option value="{{ sg }}" {% if sg == signer_filter %}selected{% endif %}>{{ sg }}</option>
+    {% endfor %}
+  </select>
   <input name="q" placeholder="Search by name" value="{{ search }}">
   <button type="submit">Filter</button>
 </form>
@@ -29,11 +35,13 @@
     </header>
     {% for r in col.returns %}
     <div class="kanban-card {{ 'overdue' if r['effective_due'] and r['effective_due'] < today }}">
-      <a class="kanban-card-name"
-         href="{{ url_for('returns.return_detail', return_id=r['id']) }}">
+      <a class="kanban-card-name" href="{{ url_for('returns.return_detail', return_id=r['id']) }}">
         <strong>{{ r['return_name'] }}</strong>
       </a>
       <div class="kanban-card-meta">{{ r['tax_year'] }} · {{ r['return_type'] }}</div>
+      {% if r['signer'] %}
+      <div class="kanban-card-signer" title="Signer">{{ r['signer'] }}</div>
+      {% endif %}
       <span class="badge" style="background: {{ r['stage_order']|status_color }}">
         {{ r['status'] }}
       </span>

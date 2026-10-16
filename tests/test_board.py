@@ -59,22 +59,18 @@ def test_new_return_starts_in_not_started_column(alice, client):
 
 
 def test_board_buckets_statuses_per_column_spec(alice, client, db):
-    """Exercises the full column mapping, including the deliberate
-    interleaving: stage 7 (Open Review Points) sits in Preparing while
-    stage 8 (Review Points Cleared) sits in In Review, and stage 10
-    (Open CRI Points) in Preparing vs. stage 9 (With CRI) in In Review."""
+    """Exercises the full column mapping: every status code in
+    constants.py must land in the KANBAN_COLUMNS bucket that claims it."""
     cases = [
         ("Alpha",   "not_started",        "Not Started"),
-        ("Bravo",   "with_preparer",      "Preparing"),
-        ("Charlie", "docs_waiting",       "Preparing"),
-        ("Delta",   "open_review_points", "Preparing"),
-        ("Echo",    "open_cri_points",    "Preparing"),
-        ("Foxtrot", "with_reviewer",      "In Review"),
-        ("Golf",    "points_cleared",     "In Review"),
-        ("Hotel",   "with_cri",           "In Review"),
-        ("India",   "out_for_signatures", "Completed"),
-        ("Juliet",  "eforms_received",    "Completed"),
-        ("Kilo",    "complete",           "Completed"),
+        ("Bravo",   "docs_requested",     "Not Started"),
+        ("Charlie", "with_preparer",      "Preparing"),
+        ("Delta",   "docs_waiting",       "Preparing"),
+        ("Echo",    "with_reviewer",      "In Review"),
+        ("Foxtrot", "with_or",            "In Review"),
+        ("Golf",    "out_for_signatures", "Completed"),
+        ("Hotel",   "eforms_received",    "Completed"),
+        ("India",   "complete",           "Completed"),
     ]
     for name, code, _column in cases:
         add_return(client, name=name, rtype="1040")
@@ -90,8 +86,8 @@ def test_board_buckets_statuses_per_column_spec(alice, client, db):
 
     counts = _counts(page)
     assert counts == {
-        b"Not Started": 1, b"Preparing": 4,
-        b"In Review": 3, b"Completed": 3,
+        b"Not Started": 2, b"Preparing": 2,
+        b"In Review": 2, b"Completed": 3,
     }
 
 

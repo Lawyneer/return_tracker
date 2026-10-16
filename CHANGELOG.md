@@ -9,12 +9,6 @@ and this project adheres to
 ## [Unreleased]
 
 ### Added
-- Bulk import of returns from a CSV file on a new "Import" page. The
-  import expects the same columns as the CSV export (Return Name, Tax
-  Year, Type, Due Date, Extended Due Date), so exported spreadsheets can
-  be edited and re-imported. Rows are validated individually: valid rows
-  are inserted, and a summary reports how many were imported, skipped as
-  duplicates, or rejected with the reason per row.
 - Assignment of returns to users. Each return has an assignee shown on
   the list, board, and detail pages; the assignee can be changed when
   updating a status (for example, handing a return from the preparer to
@@ -34,12 +28,58 @@ and this project adheres to
 - Login now requires a password. Passwords are stored salted and hashed
   (Werkzeug PBKDF2), never in plaintext; existing users are prompted to
   set a password on first login after the upgrade.
-- CSV export now includes the assignee column.
 
 ### Security
 - Added cross-site request forgery (CSRF) protection on all forms and
   session-cookie hardening (`HttpOnly`, `SameSite=Lax`) in preparation
   for internet-facing deployments.
+
+## [1.3.0] - 2026-10-15
+
+### Added
+- Signer field on returns. A free-text signer can be set when a return
+  is created and edited any time from its detail page. The signer is
+  shown on the main list, the Kanban board, and the detail page, and
+  both views gained a filter (populated from signers actually in use,
+  matched case-insensitively). The CSV export includes a Signer column.
+- Bulk import of returns from a CSV file on the main list page, with a
+  sample `import_template.csv`. Required columns: Return Name, Tax
+  Year, and Return Type; optional: Due Date, Extended Due Date, Signer,
+  and Status (by code or label). Headers are matched regardless of case
+  or punctuation, and a UTF-8 BOM (as written by Excel) is handled.
+  Rows are validated individually and committed one at a time, so one
+  bad row never blocks the rest: a summary reports counts of added,
+  skipped-as-duplicate, and rejected rows, with a reason per rejected
+  row. Imported returns get an audit-history entry recording their
+  starting signer, due dates, and origin.
+- Extended audit trail for field edits: changes to a return's signer or
+  due dates are now recorded in the status history alongside status
+  changes, with who made the change and when. A `change_type` column
+  distinguishes Status, Signer, and Due Date entries (existing rows are
+  back-filled as Status on migration), and the history table on the
+  detail page shows a Change column. No-op submissions are not logged,
+  and each edit writes its update and history entry in one transaction.
+- `tests/test_signer_audit_import.py` covering the new features:
+  signer creation, editing, display, and filtering; `change_type`
+  audit-trail entries (including no-op suppression and keeping the
+  list page's Note column scoped to status-change notes); and CSV
+  import validation (header aliasing, UTF-8 BOM handling, per-row
+  rejection reasons, duplicates, status matching by code and label).
+  The shared `add_return` test helper gained a `signer` parameter.
+
+### Changed
+- The Note column on the main list and Kanban board now reflects only
+  notes from status changes (including the creation entry), so signer
+  and date edits no longer surface there.
+- The Note column on the main list has a bounded width (160–320px,
+  ~260px target) so long notes wrap instead of stretching the table;
+  the full text remains available via hover and on the detail page.
+
+### Fixed
+- The board column-mapping test referenced status codes that don't
+  exist in `constants.py` ("Open Review Points", "Points Cleared",
+  "Open CRI Points", "With CRI"); it now exercises the statuses
+  actually defined, covering every status code end to end.
 
 ## [1.2.0] - 2026-10-12
 
@@ -140,7 +180,8 @@ and this project adheres to
   default.
 - Passwordless, name-based login suitable for trusted internal networks.
 
-[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/Lawyneer/return_tracker/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Lawyneer/return_tracker/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.0.0

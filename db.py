@@ -4,7 +4,6 @@ from flask import g
 from config import Config
 from constants import STATUSES
 
-
 def get_db():
     """Return the database connection for this request (created lazily
     and stored on Flask's application-context `g` so it's reused within
@@ -15,14 +14,12 @@ def get_db():
         g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
 
-
 def close_db(exc=None):
     """Close the connection at the end of the request
     (registered as a teardown hook by the app factory)."""
     db = g.pop("db", None)
     if db is not None:
         db.close()
-
 
 def init_db():
     """Create tables/indexes if missing and seed the statuses table.
@@ -54,7 +51,7 @@ def init_db():
         archived_at        TIMESTAMP,
         current_status_id  INTEGER NOT NULL REFERENCES statuses(id),
         created_by         INTEGER NOT NULL REFERENCES users(id),
-        created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE (return_name, tax_year, return_type)
     );
     CREATE TABLE IF NOT EXISTS status_history (
@@ -69,10 +66,18 @@ def init_db():
     CREATE INDEX IF NOT EXISTS idx_hist_return ON status_history(return_id, changed_at);
     CREATE INDEX IF NOT EXISTS idx_returns_status ON tax_returns(current_status_id);
     """)
-    # Migration for databases created before archiving existed.
+    # Migrations for databases created before newer features existed.
     cols = [r["name"] for r in db.execute("PRAGMA table_info(tax_returns)").fetchall()]
     if "archived_at" not in cols:
         db.execute("ALTER TABLE tax_returns ADD COLUMN archived_at TIMESTAMP")
+    if "signer" not in cols:
+        db.execute("ALTER TABLE tax_returns ADD COLUMN signer TEXT")
+    hist_cols = [r["name"] for r in db.execute("PRAGMA table_info(status_history)").fetchall()]
+    if "change_type" not in hist_cols:
+        db.execute("ALTER TABLE status_history ADD COLUMN change_type TEXT")
+    # Existing history rows were all status changes; label them so the
+    # history display stays consistent after the migration.
+    db.execute("UPDATE status_history SET change_type='status' WHERE change_type IS NULL")
     # Seed the fixed workflow statuses (no-op if they already exist).
     for code, label, order in STATUSES:
         db.execute("INSERT OR IGNORE INTO statuses (code, label, stage_order) VALUES (?,?,?)",

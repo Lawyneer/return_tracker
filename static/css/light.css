@@ -31,11 +31,16 @@ button { padding: 6px 14px; cursor: pointer; background: #fff;
 button:hover { background: #eaeaea; }
  .dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
  .status-card { background: #fff; padding: 10px 14px; border-radius: 6px;
-                min-width: 120px; text-align: center; border: 1px solid #ddd; }
+                min-width: 200px; text-align: center; border: 1px solid #ddd; }
  .status-card .count { font-size: 24px; font-weight: bold; }
  .status-card .label { font-size: 12px; margin-top: 4px; color: #777; }
  .status-card.active { border-left: 4px solid #4a9eff; }
  .status-card.archived { border-left: 4px solid #8866aa; }
+ th.note-col, td.note-col {
+  width: 260px;
+  min-width: 160px;
+  max-width: 320px;
+}
 
 /* ---- Kanban board ---- */
 .kanban { display: flex; gap: 12px; align-items: flex-start;
@@ -57,6 +62,7 @@ button:hover { background: #eaeaea; }
 .kanban-due, .kanban-card-meta, .kanban-note { font-size: 0.85em; margin-top: 4px;
                                                 color: #777; }
 .kanban-empty { color: #999; font-size: 0.85em; padding: 8px 2px; }
+.kanban-card-signer { font-size: 0.85em; opacity: 0.8; }
 
 /* ---- Cancel button (styled like adjacent <button>) ---- */
 .btn-cancel, .btn-cancel:visited, .btn-cancel:hover {

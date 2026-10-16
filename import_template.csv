@@ -1,0 +1,4 @@
+Return name,Tax Year,Return Type,Due Date,Extended Due Date,Signer,Status
+Imported Return 01,2026,1040,2027-04-15,2027-10-15,George P. Burdell,Not Started
+Imported Return 02,2026,1065,2027-03-15,2027-09-15,George P. Burdell,In Preparation
+Imported Return 03,2026,1065,,,,
