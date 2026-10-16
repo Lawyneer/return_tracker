@@ -97,6 +97,10 @@ return_tracker/
 ├── helpers.py              # Shared utilities, template context, Jinja filters
 ├── returns.py              # Blueprint: return CRUD, archive, CSV import/export
 ├── import_template.csv     # Sample CSV for the bulk import
+├── screenshots/            # Images referenced by the README
+│   ├── kanban.png
+│   ├── main_page.png
+│   └── detail_page.png
 ├── .gitattributes          # Line-ending normalization; DB treated as binary
 ├── CONTRIBUTING.md         # How to contribute
 ├── pytest.ini              # Test runner configuration
