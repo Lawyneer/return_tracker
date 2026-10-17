@@ -1,23 +1,35 @@
 {% extends "base.html" %}
 {% block title %}New Return — Tax Return Tracker{% endblock %}
+{% block page_title %}Add Tax Return{% endblock %}
 {% block content %}
-<h1>Add Tax Return</h1>
 <form method="post">
-  <label>Return name (individual or company)</label>
-  <input name="return_name" size="40" required>
-  <label>Tax year</label>
-  <input name="tax_year" placeholder="e.g. 2025" required>
-  <label>Return type</label>
-  <select name="return_type">
-    {% for t in return_types %}<option>{{ t }}</option>{% endfor %}    
-  </select>
-  <label>Due date (YYYY-MM-DD or MM/DD/YYYY)</label>
-  <input name="due_date" placeholder="e.g. 04/15/2026">
-  <label>Extended due date</label>
-  <input name="extended_due_date" placeholder="e.g. 10/15/2026">
-  <label>Signer</label>
-  <input name="signer" size="40" placeholder="e.g. Jane Smith">
-  <p><button type="submit">Add Return</button>
-   <a href="{{ url_for('returns.index') }}" class="btn-cancel">Cancel</a></p>
+  <div class="mb-3">
+    <label class="form-label">Return name (individual or company)</label>
+    <input name="return_name" class="form-control" size="40" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Tax year</label>
+    <input name="tax_year" class="form-control" placeholder="e.g. 2025" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Return type</label>
+    <select name="return_type" class="form-select w-auto">
+      {% for t in return_types %}<option>{{ t }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Due date (YYYY-MM-DD or MM/DD/YYYY)</label>
+    <input name="due_date" class="form-control w-auto" placeholder="e.g. 04/15/2026">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Extended due date</label>
+    <input name="extended_due_date" class="form-control w-auto" placeholder="e.g. 10/15/2026">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Signer</label>
+    <input name="signer" class="form-control w-auto" size="40" placeholder="e.g. Jane Smith">
+  </div>
+  <p><button type="submit" class="btn btn-primary">Add Return</button>
+     <a href="{{ url_for('returns.index') }}" class="btn btn-cancel btn-outline-secondary ms-2">Cancel</a></p>
 </form>
 {% endblock %}

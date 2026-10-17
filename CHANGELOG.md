@@ -8,31 +8,44 @@ and this project adheres to
 
 ## [Unreleased]
 
+
+## [1.4.0] - 2026-10-17
+
 ### Added
-- Assignment of returns to users. Each return has an assignee shown on
-  the list, board, and detail pages; the assignee can be changed when
-  updating a status (for example, handing a return from the preparer to
-  the reviewer when it moves to a review stage) or on its own. Every
-  assignment change is recorded in the status history with its
-  timestamp and the user who made the change.
-- Pipeline statistics page showing how long returns spend at each
-  workflow status, computed from the status history, plus counts of
-  returns moved per status by each user.
-- Database backup download, which produces a consistent snapshot of the
-  SQLite database using SQLite's online backup API, safe to run while
-  the app is serving requests.
-- Login rate limiting with temporary lockout after repeated failed
-  attempts from the same username.
+- New sidebar-based page shell built on the iPortfolio (Bootstrap)
+  template. All post-login pages share a fixed left sidebar with the
+  site navigation (All Returns, Archived Returns, Kanban Board,
+  Add Return, Export CSV, Import CSV Guide, logout, and the theme
+  toggle); the sidebar is styled independently of the active theme.
+  Supported by new `static/css/main.css`, `static/css/sidebar.css`,
+  and `static/css/layout.css`, plus bundled Bootstrap/vendor assets.
+- Import CSV Guide page at `/import-info` (sidebar link "Import CSV
+  Guide"), consolidating the CSV upload form and format documentation
+  on one page, with a downloadable sample file served from
+  `/import-sample`.
 
 ### Changed
-- Login now requires a password. Passwords are stored salted and hashed
-  (Werkzeug PBKDF2), never in plaintext; existing users are prompted to
-  set a password on first login after the upgrade.
+- The login page is now a standalone, centered card with no sidebar or
+  site navigation, and all other pages require an authenticated session.
+- The CSV import control moved from the main list page to the Import
+  CSV Guide page; the main list keeps the status dashboard, filters,
+  and table only.
+- The "Show archived returns" toggle on the list and board pages was
+  replaced by a permanent "Archived Returns" link in the sidebar.
+- Theme stylesheets (`light.css`, `dark.css`) now restyle the template
+  by overriding its color variables rather than painting over it, so
+  dark mode applies consistently to the page banner, sections, footer,
+  tables, and form controls.
+- The footer is pinned to the bottom of the browser window on pages
+  without enough content to scroll, and flows below content on long
+  pages.
 
-### Security
-- Added cross-site request forgery (CSRF) protection on all forms and
-  session-cookie hardening (`HttpOnly`, `SameSite=Lax`) in preparation
-  for internet-facing deployments.
+### Fixed
+- Table text (Year, Type, Due Date, Signer, Note columns) was
+  black-on-black in dark mode and unreadable; cells now use the theme
+  text color.
+- The native file-input "Browse" button showed white-on-white text in
+  dark mode; it now renders black text on white in both themes.
 
 ## [1.3.0] - 2026-10-15
 
@@ -74,6 +87,10 @@ and this project adheres to
 - The Note column on the main list has a bounded width (160–320px,
   ~260px target) so long notes wrap instead of stretching the table;
   the full text remains available via hover and on the detail page.
+  - Reduced the workflow from 13 stages to 9, trimming statuses that were
+  no longer used; returns sitting on a removed status are migrated to
+  the nearest remaining stage and board column mappings are updated
+  accordingly.
 
 ### Fixed
 - The board column-mapping test referenced status codes that don't
@@ -180,7 +197,8 @@ and this project adheres to
   default.
 - Passwordless, name-based login suitable for trusted internal networks.
 
-[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/Lawyneer/return_tracker/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Lawyneer/return_tracker/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Lawyneer/return_tracker/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Lawyneer/return_tracker/compare/v1.0.0...v1.1.0

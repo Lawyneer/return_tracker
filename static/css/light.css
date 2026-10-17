@@ -1,46 +1,80 @@
-body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; margin: 0;
-        background: #f4f5f7; color: #222; }
- .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
- h1 { font-size: 22px; } h2 { font-size: 17px; }
- a { color: #1a5276; }
- a:visited { color: #1a5276; }
- a:hover { color: #2874a6; }
- nav { background: #333; padding: 10px 20px; color: #fff;
-       border-bottom: 1px solid #222; }
- nav a, nav span { color: #fff; margin-right: 15px; text-decoration: none; }
- nav a:hover { text-decoration: underline; }
- nav a:visited { color: #fff; }
- table { border-collapse: collapse; width: 100%; background: #fff;
-         box-shadow: 0 1px 3px rgba(0,0,0,.12); }
- th, td { padding: 8px 10px; border-bottom: 1px solid #ddd; text-align: left;
-          font-size: 14px; }
- th { background: #eee; }
- tr.overdue td { background: #fdecea; }
- tr.archived td { opacity: 0.6; }
- .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
-          background: #dfe6f5; font-size: 13px; color: #ffffff; }
- .flash { padding: 8px 12px; background: #e6f4ea; border: 1px solid #b7dfc0;
-          margin-bottom: 10px; border-radius: 4px; }
- form.inline { display: inline; }
- input, select { padding: 6px 10px; margin: 2px 0; }
- label { font-size: 13px; display: block; margin-top: 8px; }
-button { padding: 6px 14px; cursor: pointer; background: #fff;
-          border: 1px solid #ccc; color: #222; border-radius: 4px;
-          font: inherit; font-size: 14px; line-height: 1.2;
-          vertical-align: middle; }
-button:hover { background: #eaeaea; }
- .dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
- .status-card { background: #fff; padding: 10px 14px; border-radius: 6px;
-                min-width: 200px; text-align: center; border: 1px solid #ddd; }
- .status-card .count { font-size: 24px; font-weight: bold; }
- .status-card .label { font-size: 12px; margin-top: 4px; color: #777; }
- .status-card.active { border-left: 4px solid #4a9eff; }
- .status-card.archived { border-left: 4px solid #8866aa; }
- th.note-col, td.note-col {
-  width: 260px;
-  min-width: 160px;
-  max-width: 320px;
+/* =============================================================
+   Light theme — mirrors dark.css but with the light palette.
+   ============================================================= */
+:root {
+  --background-color: #f4f5f7;
+  --default-color: #222222;
+  --heading-color: #050d18;
+  --surface-color: #ffffff;
+  --contrast-color: #ffffff;
+
+  --bs-body-bg: #f4f5f7;
+  --bs-body-color: #222222;
 }
+
+h2 { font-size: 18px; margin-top: 1.6em; }
+
+/* ---- Tables ---- */
+table { border-collapse: collapse; width: 100%;
+        background: var(--surface-color);
+        box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+th, td { padding: 8px 10px; border-bottom: 1px solid #ddd;
+         text-align: left; font-size: 14px; }
+th { background: #eee; }
+tr.overdue td { background: #fdecea; }
+tr.archived td { opacity: 0.6; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+         background: #dfe6f5; font-size: 13px; color: #ffffff; }
+
+.flash { padding: 8px 12px; background: #e6f4ea; border: 1px solid #b7dfc0;
+         margin-bottom: 10px; border-radius: 4px; }
+
+form.inline { display: inline; }
+label { font-size: 13px; display: block; margin-top: 8px; }
+
+/* ---- Forms ---- */
+input, select, .form-control, .form-select {
+  padding: 6px 10px; margin: 2px 0; background: #fff;
+  border: 1px solid #ccc; color: #222; border-radius: 4px;
+  font: inherit; display: inline-block; width: auto;
+}
+.form-control:focus, .form-select:focus {
+  background-color: #fff; color: #222;
+  border-color: #86b7fe; box-shadow: none;
+}
+input::placeholder, .form-control::placeholder { color: #888; }
+
+/* ---- Buttons ---- */
+button, .btn, .btn-primary, .btn-secondary,
+.btn-outline-secondary, .btn-warning {
+  padding: 6px 14px; cursor: pointer; background: #fff;
+  border: 1px solid #ccc; color: #222; border-radius: 4px;
+  font: inherit; font-size: 14px; line-height: 1.2;
+  vertical-align: middle; text-decoration: none;
+}
+button:hover, .btn:hover, .btn-primary:hover, .btn-secondary:hover,
+.btn-outline-secondary:hover, .btn-warning:hover {
+  background: #eaeaea; color: #222;
+}
+
+/* ---- Status dashboard cards ---- */
+.dashboard { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.status-card { background: var(--surface-color); padding: 10px 14px;
+               border-radius: 6px; min-width: 200px; text-align: center;
+               border: 1px solid #ddd;
+               box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.status-card .count { font-size: 24px; font-weight: bold; }
+.status-card .label { font-size: 12px; margin-top: 4px; color: #777; }
+.status-card.active { border-left: 4px solid #4a9eff; }
+.status-card.archived { border-left: 4px solid #8866aa; }
+
+/* ---- Table column widths ---- */
+th.note-col, td.note-col   { width: 260px; min-width: 160px; max-width: 320px; }
+th.date-col, td.date-col   { width: 75px;  min-width: 50px;  max-width: 100px; }
+th.year-col,  td.year-col  { width: 50px;  min-width: 50px;  max-width: 100px; }
+th.type-col,  td.type-col  { width: 75px;  min-width: 50px;  max-width: 100px; }
+th.signer-col, td.signer-col { width: 100px; min-width: 50px; max-width: 150px; }
 
 /* ---- Kanban board ---- */
 .kanban { display: flex; gap: 12px; align-items: flex-start;
@@ -59,12 +93,12 @@ button:hover { background: #eaeaea; }
                border-radius: 6px; padding: 8px; margin-bottom: 8px; }
 .kanban-card.overdue { border-color: #cc2222; border-left: 4px solid #cc2222; }
 .kanban-overdue-flag { color: #cc2222; font-weight: bold; margin-top: 4px; }
-.kanban-due, .kanban-card-meta, .kanban-note { font-size: 0.85em; margin-top: 4px;
-                                                color: #777; }
+.kanban-due, .kanban-card-meta, .kanban-note { font-size: 0.85em;
+                                                margin-top: 4px; color: #777; }
 .kanban-empty { color: #999; font-size: 0.85em; padding: 8px 2px; }
 .kanban-card-signer { font-size: 0.85em; opacity: 0.8; }
 
-/* ---- Cancel button (styled like adjacent <button>) ---- */
+/* ---- Cancel button ---- */
 .btn-cancel, .btn-cancel:visited, .btn-cancel:hover {
   display: inline-block; padding: 6px 14px; margin-left: 8px;
   background: #fff; border: 1px solid #ccc; color: #222;
@@ -72,3 +106,30 @@ button:hover { background: #eaeaea; }
   font: inherit; font-size: 14px; line-height: 1.2;
   vertical-align: middle; }
 .btn-cancel:hover { background: #eaeaea; color: #222; }
+
+/* ---- Standalone login page ---- */
+.auth-page { display: flex; align-items: center; justify-content: center;
+             min-height: 100vh; background: var(--background-color); }
+.auth-card { background: var(--surface-color); padding: 30px 36px;
+             border-radius: 8px; border: 1px solid #ddd;
+             box-shadow: 0 2px 12px rgba(0,0,0,.1);
+             width: 100%; max-width: 420px; }
+.auth-card h1 { font-size: 22px; }
+.auth-card h2 { margin-top: 1.4em; }
+
+
+/* Logo text stays dark */
+.header .logo h1 {
+  color: #272829 !important;
+}
+
+/* Nav items in sidebar (always white bg, dark text) */
+.navmenu a, .navmenu a:focus {
+  color: #272829 !important;
+}
+.navmenu a:hover, .navmenu .active, .navmenu .active:focus {
+  color: #149ddd !important;
+}
+.navmenu a:hover .navicon, .navmenu .active .navicon {
+  color: #149ddd !important;
+}

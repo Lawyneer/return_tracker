@@ -1,23 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Returns — Tax Return Tracker{% endblock %}
+{% block page_title %}{{ 'Archived Tax Returns' if show_archived else 'Tax Returns' }}{% endblock %}
 {% block content %}
-<h1>{{ 'Archived Tax Returns' if show_archived else 'Tax Returns' }}</h1>
-{% if show_archived %}
-  <p><a href="{{ url_for('returns.index') }}">&larr; Back to active returns</a></p>
-{% else %}
-  <p><a href="{{ url_for('returns.index', archived=1) }}">Show archived returns</a></p>
-{% endif %}
-
-<form method="post" class="inline" enctype="multipart/form-data"
-      action="{{ url_for('returns.import_csv') }}">
-  <input type="file" name="csv_file" accept=".csv,text/csv">
-  <button type="submit">Import CSV</button>
-</form>
-<p style="font-size: 0.85em; opacity: 0.75;">
-  CSV must include <strong>Return Name</strong>, <strong>Tax Year</strong>, and
-  <strong>Return Type</strong>. Optional columns: Due Date, Extended Due Date,
-  Signer, Status. Headers are matched regardless of case or punctuation.
-</p>
 
 {# Dashboard: count of active returns in each workflow status #}
 {% if not show_archived %}
@@ -34,9 +18,9 @@
 {% endif %}
 
 {# Filter bar: status, type, signer, and free-text name search #}
-<form method="get" class="inline">
+<form method="get" class="inline mb-3">
   {% if show_archived %}<input type="hidden" name="archived" value="1">{% endif %}
-  <select name="status">
+  <select name="status" class="form-select form-select-sm d-inline-block w-auto">
     <option value="">All statuses</option>
     {% for s in statuses %}
     <option value="{{ s['id'] }}"
@@ -44,52 +28,43 @@
       {{ s['label'] }}</option>
     {% endfor %}
   </select>
-  <select name="type">
+  <select name="type" class="form-select form-select-sm d-inline-block w-auto">
     <option value="">All types</option>
     {% for t in return_types %}
     <option value="{{ t }}" {% if t == type_filter %}selected{% endif %}>{{ t }}</option>
     {% endfor %}
   </select>
-  <select name="signer">
+  <select name="signer" class="form-select form-select-sm d-inline-block w-auto">
     <option value="">All signers</option>
     {% for sg in distinct_signers %}
     <option value="{{ sg }}" {% if sg == signer_filter %}selected{% endif %}>{{ sg }}</option>
     {% endfor %}
   </select>
-  <input name="q" placeholder="Search by name" value="{{ search }}">
-  <button type="submit">Filter</button>
+  <input name="q" class="form-control form-control-sm d-inline-block w-auto"
+         placeholder="Search by name" value="{{ search }}">
+  <button type="submit" class="btn btn-sm btn-secondary">Filter</button>
 </form>
 
-<table>
+<div class="table-responsive">
+<table class="table">
 <tr>
-  <th>Return</th><th>Year</th><th>Type</th><th>Status</th><th>Due Date</th><th>Signer</th><th class="note-col">Note</th>
-  {% if show_archived %}<th>Archived</th><th></th>{% endif %}
+  <th>Return</th><th>Year</th><th>Type</th><th>Status</th><th>Due Date</th><th>Signer</th><th>Note</th>
 </tr>
 {% for r in returns %}
-{# Rows past their effective due date get highlighted as overdue #}
 <tr class="{{ 'overdue' if r['effective_due'] and r['effective_due'] < today else '' }}{{ ' archived' if show_archived }}">
   <td><a href="{{ url_for('returns.return_detail', return_id=r['id']) }}"><strong>{{ r['return_name'] }}</strong></a></td>
-  <td class ="date-col">{{ r['tax_year']}}</td>
-  <td class ="type-col">{{ r['return_type'] }}</td>
+  <td class="date-col">{{ r['tax_year'] }}</td>
+  <td class="type-col">{{ r['return_type'] }}</td>
   <td><span class="badge" style="background: {{ r['stage_order']|status_color }}">{{ r['status'] }}</span></td>
-  <td class ="date-col">{{ r['effective_due'] or '' }}{{ ' OVERDUE' if r['effective_due'] and r['effective_due'] < today }}</td>
-  <td class ="signer-col">{{ r['signer'] or '—' }}</td>
+  <td class="date-col">{{ r['effective_due'] or '' }}{{ ' OVERDUE' if r['effective_due'] and r['effective_due'] < today }}</td>
+  <td class="signer-col">{{ r['signer'] or '—' }}</td>
   <td class="note-col" title="Noted {{ r['last_note_at'] or '' }}">{{ r['last_note'] or '' }}</td>
-  {% if show_archived %}
-  <td>{{ r['archived_at'] or '' }}</td>
-  <td>
-    <form method="post" class="inline"
-          action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
-      <input type="hidden" name="archive_action" value="unarchive">
-      <button type="submit">Restore</button>
-    </form>
-  </td>
-  {% endif %}
 </tr>
 {% else %}
-<tr><td colspan="{{ 9 if show_archived else 7 }}">
-  {{ 'No archived returns.' if show_archived else 'No returns yet — add one with "+ Add Return."' }}
+<tr><td colspan="7">
+  {{ 'No returns yet — add one with "Add Return."' if not show_archived else 'No archived returns.' }}
 </td></tr>
 {% endfor %}
 </table>
+</div>
 {% endblock %}

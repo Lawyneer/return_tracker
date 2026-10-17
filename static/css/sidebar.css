@@ -1,0 +1,47 @@
+/* =============================================================
+   Sidebar styling — navy by default (light mode).
+   Dark mode repoints the background via dark.css, which now
+   loads after this file. Text stays white in all states.
+   ============================================================= */
+
+.header {
+  background-color: #040b14 !important;
+  border-right: 1px solid #1a2330 !important;
+}
+
+/* Brand / logo */
+.header .logo h1 {
+  color: #ffffff !important;
+}
+
+/* Nav links — white in every state */
+.navmenu a,
+.navmenu a:focus,
+.navmenu a:visited {
+  color: #ffffff !important;
+}
+
+.navmenu a .navicon,
+.navmenu a:focus .navicon {
+  color: #ffffff !important;
+}
+
+/* Hover / active: stay white, gain a subtle highlight for affordance */
+.navmenu a:hover,
+.navmenu .active,
+.navmenu .active:focus {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.navmenu a:hover .navicon,
+.navmenu .active .navicon,
+.navmenu .active:focus .navicon {
+  color: #ffffff !important;
+}
+
+/* Mobile hamburger toggle keeps the accent color so it stays findable */
+.header .header-toggle {
+  background-color: #149ddd;
+  color: #ffffff;
+}

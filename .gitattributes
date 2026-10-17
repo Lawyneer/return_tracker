@@ -19,3 +19,7 @@
 
 # Exported reports shouldn't be diffed or normalized.
 *.csv -text
+
+# Vendor JS files - preserve original line endings
+static/vendor/**/*.js text eol=lf
+static/vendor/**/*.css text eol=lf

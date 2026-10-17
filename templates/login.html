@@ -1,22 +1,39 @@
-{% extends "base.html" %}
-{% block title %}Login — Tax Return Tracker{% endblock %}
-{% block content %}
-<h1>Tax Return Status Tracker</h1>
-<h2>Select your name</h2>
-<form method="post">
-  <input type="hidden" name="action" value="login">
-  <select name="user_id">
-    <option value="">-- choose user --</option>
-    {% for u in users %}
-    <option value="{{ u['id'] }}">{{ u['username'] }}</option>
-    {% endfor %}
-  </select>
-  <button type="submit">Sign in</button>
-</form>
-<h2>Add a new user</h2>
-<form method="post">
-  <input type="hidden" name="action" value="add_user">
-  <input name="new_username" placeholder="Name">
-  <button type="submit">Add</button>
-</form>
-{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Tax Return Tracker</title>
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Raleway:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/' ~ theme ~ '.css') }}">
+</head>
+<body class="auth-page">
+<main class="auth-card">
+  <h1>Tax Return Status Tracker</h1>
+  <h2>Select your name</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="login">
+    <select name="user_id">
+      <option value="">-- choose user --</option>
+      {% for u in users %}
+      <option value="{{ u['id'] }}">{{ u['username'] }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Sign in</button>
+  </form>
+  <h2>Add a new user</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="add_user">
+    <input name="new_username" placeholder="Name">
+    <button type="submit">Add</button>
+  </form>
+</main>
+</body>
+</html>

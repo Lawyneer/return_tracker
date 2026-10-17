@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Import CSV Guide — Tax Return Tracker{% endblock %}
+{% block page_title %}Import CSV Guide{% endblock %}
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2>Upload CSV File</h2>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('returns.import_csv') }}">
+      <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <button type="submit" class="btn btn-primary">Import CSV</button>
+        <div class="input-group" style="max-width: 500px;">
+          <input type="file" name="csv_file" class="form-control" accept=".csv,text/csv">
+        </div>
+      </div>
+    </form>
+
+    <hr class="my-4">
+
+    <h3>CSV File Requirements</h3>
+    <p>To bulk-import tax returns, upload a CSV file with the following structure:</p>
+
+    <h4>Required Columns</h4>
+    <ul>
+      <li><strong>Return Name</strong> — Individual or company name</li>
+      <li><strong>Tax Year</strong> — Four-digit year (e.g., 2025)</li>
+      <li><strong>Return Type</strong> — Form type (e.g., 1040, 1120-S)</li>
+    </ul>
+
+    <h4>Optional Columns</h4>
+    <ul>
+      <li><strong>Due Date</strong> — Format: YYYY-MM-DD or MM/DD/YYYY</li>
+      <li><strong>Extended Due Date</strong> — Format: YYYY-MM-DD or MM/DD/YYYY</li>
+      <li><strong>Signer</strong> — Name of assigned signer</li>
+      <li><strong>Status</strong> — One of your workflow status labels;
+        anything unrecognized causes that row to be skipped</li>
+    </ul>
+
+    <h4>Column Matching</h4>
+    <p>Header names are matched case-insensitively and ignoring punctuation/spaces.
+    So "Return_Name", "returnname", or "Return Name" will all be recognized.</p>
+
+    <h4>Sample Data</h4>
+    <pre class="bg-dark text-light p-3 rounded"><code>Return Name,Tax Year,Return Type,Due Date,Extended Due Date,Signer
+John Smith,2025,1040,04/15/2026,10/15/2026,Jane Smith
+Acme Corp,2025,1120-S,03/15/2026,,Robert Chen
+Maria Lopez,2025,1065,04/15/2026,,Jane Smith</code></pre>
+
+    <p class="mt-3">
+      <a href="{{ url_for('returns.import_sample') }}" class="btn btn-sm btn-outline-primary">
+        Download Sample CSV
+      </a>
+    </p>
+
+    <hr class="my-4">
+
+    <h4>How to Import</h4>
+    <ol>
+      <li>Upload your CSV file above using the Browse button</li>
+      <li>Click <strong>Import CSV</strong> to submit</li>
+      <li>New returns are added to the bottom of the workflow (status: Not Started)</li>
+      <li>Duplicate rows are skipped and reported back to you</li>
+      <li>Any validation errors (invalid dates, unknown status) are listed in the results</li>
+    </ol>
+    <p>The imported returns appear immediately on the
+    <a href="{{ url_for('returns.index') }}">All Returns</a> page.</p>
+  </div>
+</div>
+
+{% endblock %}

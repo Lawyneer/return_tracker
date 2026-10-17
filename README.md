@@ -9,8 +9,10 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ## Features
 
-- **9-stage workflow tracking** — statuses progress from "Not Started" through
-  document collection, preparer/reviewer stages, signature collection, and filing.
+- **Workflow stage tracking** — return status progresses through various
+  workflow stages (configurable per deployment), with dashboard counts,
+  a kanban board, and filtering by any combination of status, return type,
+  and signer.
 - **Signer tracking** — each return records a signer (set at creation or any
   time later), shown on the list, board, and detail pages, filterable in both
   views, and included in the CSV export
@@ -33,20 +35,19 @@ teams that want a shared checklist-style tracker with a full audit trail.
   Tax Year, and Return Type are required (see
   [CSV Import](#csv-import)); a ready-to-edit template ships with the repo
   (`import_template.csv`)
+  - **Import CSV Guide page** — the upload form and complete format
+  documentation live on a dedicated "Import CSV Guide" page reachable
+  from the sidebar, with a downloadable sample file
 - **Dual themes** — dark mode (default) and light mode
 - **Tested** — pytest suite covering login, the audit trail (status changes
   and signer/due-date edits), signer handling, CSV import and export,
   archiving, and filtering, run automatically in CI
 - **Zero external services** — single SQLite database file, no server setup,
-  no accounts or passwords to manage
+  no accounts or passwords to manage (a password login is planned, see [Roadmap](#roadmap))
 
 ## Screenshots
 
 ### Workflow Board (Kanban View)
-
-![Workflow Board](screenshots/kanban.png)
-
-The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and signer.
 
 ### Dashboard Overview
 
@@ -54,11 +55,21 @@ The kanban board groups active returns into four columns — Not Started, Prepar
 
 The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
 
+![Workflow Board](screenshots/kanban.png)
+
+The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and signer.
+
 ### Return Detail Page
 
 ![Return Detail Page](screenshots/detail_page.png)
 
 Each return's detail page includes status change controls, due date and signer editing, the full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
+
+### Import CSV Guide
+
+![Import CSV Guide](screenshots/import_guide.png)
+
+The Import CSV Guide page pairs the bulk-upload form with complete documentation of the expected file format — required and optional columns, accepted date formats, and header-matching rules — along with a downloadable sample file to start from.
 
 ## Supported Return Types
 
@@ -74,14 +85,20 @@ return_tracker/
 ├── templates/
 │   ├── base.html
 │   ├── board.html
-│   ├── login.html
+│   ├── detail.html
+│   ├── import_info.html    # Import CSV Guide (upload form + docs)
 │   ├── index.html
-│   ├── new_return.html
-│   └── detail.html
+│   ├── login.html
+│   └── new_return.html
 ├── static/
 │   └── css/
-│       ├── dark.css
-│       └── light.css
+│   |   ├── dark.css
+│   │   ├── layout.css      # Structural rules (sticky footer)
+│   |   ├── light.css
+│   │   ├── main.css
+│   |   └── sidebar.scc     # Sidebar styling (theme-independent)
+│   ├── js/                 # Template JavaScript
+│   └── vendor/             # Bootstrap, AOS, Bootstrap Icons, etc.
 ├── tests/
 │   ├── conftest.py         # Shared fixtures (temp database, client, user)
 │   ├── test_auth.py        # Login flow, access control, theme toggle
@@ -167,15 +184,17 @@ deactivate
    signer and due dates)
 4. Open a return to change its status, add notes, or edit due dates and the
    signer
-5. Click **Workflow Board** in the nav bar for the four-column kanban
+5. Open the **Kanban Board** from the left sidebar for the four-column
    overview of where every return stands
-6. Have a spreadsheet of returns ready? Use the CSV import on the main page
+6. Have a spreadsheet of returns ready? Use the **Import CSV Guide**
+   link in the sidebar to upload it
 
 ## CSV Import
 
-The main list page includes an **Import CSV** control for bulk-adding returns.
-Columns are matched by header name, case and punctuation insensitive, and a
-UTF-8 BOM (typical of Excel exports) is handled automatically.
+The sidebar's **Import CSV Guide** page includes the upload form and
+complete format documentation, plus a downloadable sample file.
+Columns are matched by header name, case and punctuation insensitive,
+and a UTF-8 BOM (typical of Excel exports) is handled automatically.
 
 Required columns:
 
@@ -255,7 +274,37 @@ Before exposing it beyond a private LAN, consider:
 - Adding real password-based authentication
 - Serving over HTTPS
 
-Note that password authentication is planned — see [Unreleased](CHANGELOG.md)
+Password authentication, login rate limiting, and CSRF protection are
+planned — see [Roadmap](#roadmap). Until they ship, treat this app as
+insecure on any network you don't fully control.
+
+## Roadmap
+
+These are the final planned features for the project — once they ship,
+the app is considered feature-complete.
+
+- **Assignment of returns to users** — assign a preparer or reviewer to
+  each return, changeable during a status update or on its own, with
+  every reassignment recorded in the status history
+- **Pipeline statistics** — time spent at each workflow status and a
+  per-user count of status moves, computed from the existing audit trail
+- **Database backup download** — a consistent SQLite snapshot taken via
+  SQLite's online backup API, safe to run while the app is serving requests
+- **Password authentication** — replace the current passwordless,
+  name-based login: passwords stored salted and hashed (Werkzeug
+  PBKDF2), existing users prompted to set a password on first login
+  after the upgrade
+- **Login rate limiting** — temporary lockout after repeated failed
+  attempts on the same username
+- **CSRF protection** — token protection on all forms and hardened
+  session cookies (`HttpOnly`, `SameSite=Lax`), in preparation for
+  internet-facing deployments
+
+The last three are related hardening work that would ship together, and
+together they would make the app safe to expose beyond a trusted network.
+Until then, the [security notes](#security-notes) apply.
+
+See [CHANGELOG.md](CHANGELOG.md) for what has already been released.
 
 ## License
 

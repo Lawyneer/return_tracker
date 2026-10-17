@@ -1,29 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Board — Tax Return Tracker{% endblock %}
+{% block page_title %}{{ 'Archived Tax Returns' if show_archived else 'Workflow Board' }}{% endblock %}
 {% block content %}
-<h1>{{ 'Archived Tax Returns' if show_archived else 'Workflow Board' }}</h1>
 {% if show_archived %}
   <p><a href="{{ url_for('returns.board') }}">&larr; Back to active board</a></p>
 {% else %}
   <p><a href="{{ url_for('returns.board', archived=1) }}">Show archived returns</a></p>
 {% endif %}
 
-<form method="get" class="inline">
+<form method="get" class="inline mb-3">
   {% if show_archived %}<input type="hidden" name="archived" value="1">{% endif %}
-  <select name="type">
+  <select name="type" class="form-select form-select-sm d-inline-block w-auto">
     <option value="">All types</option>
     {% for t in return_types %}
     <option value="{{ t }}" {% if t == type_filter %}selected{% endif %}>{{ t }}</option>
     {% endfor %}
   </select>
-  <select name="signer">
+  <select name="signer" class="form-select form-select-sm d-inline-block w-auto">
     <option value="">All signers</option>
     {% for sg in distinct_signers %}
     <option value="{{ sg }}" {% if sg == signer_filter %}selected{% endif %}>{{ sg }}</option>
     {% endfor %}
   </select>
-  <input name="q" placeholder="Search by name" value="{{ search }}">
-  <button type="submit">Filter</button>
+  <input name="q" class="form-control form-control-sm d-inline-block w-auto"
+         placeholder="Search by name" value="{{ search }}">
+  <button type="submit" class="btn btn-sm btn-secondary">Filter</button>
 </form>
 
 <div class="kanban">
@@ -59,7 +60,7 @@
       <form method="post" class="inline"
             action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
         <input type="hidden" name="archive_action" value="unarchive">
-        <button type="submit">Restore</button>
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Restore</button>
       </form>
       {% endif %}
     </div>

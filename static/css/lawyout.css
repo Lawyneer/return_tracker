@@ -1,0 +1,23 @@
+/* =============================================================
+   Page layout — theme-independent structural rules.
+   Makes the footer stick to the bottom of the viewport on short
+   pages, while still flowing naturally below long content.
+   ============================================================= */
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* accounts for mobile browser chrome */
+  display: flex;
+  flex-direction: column;
+}
+
+/* main absorbs all remaining vertical space, so the footer
+   lands at the bottom even when the content is short */
+.main {
+  flex: 1 0 auto;
+}
+
+/* never let the footer compress or stretch */
+.footer {
+  flex-shrink: 0;
+}

@@ -117,8 +117,8 @@ def index():
 @returns_bp.route("/board")
 def board():
     """Kanban board: active returns grouped into four workflow columns
-    (Not Started, Preparing, In Review, Completed) with per-column
-    counts, filterable by return type, signer, and name search."""
+    (Not Started, Preparing, In Review, Completed) with per-column counts,
+    filterable by return type, signer, and name search."""
     if current_user_id() is None:
         return redirect(url_for("auth.login"))
     db = get_db()
@@ -556,3 +556,31 @@ def import_csv():
         flash(f"…and {len(errors) - 10} more error(s).")
 
     return redirect(url_for("returns.index"))
+
+# ---------------------------- CSV import guide -------------------------------
+
+@returns_bp.route("/import-info")
+def import_info():
+    """Informational page describing the CSV import format."""
+    if current_user_id() is None:
+        return redirect(url_for("auth.login"))
+    return render_template("import_info.html")
+
+@returns_bp.route("/import-sample")
+def import_sample():
+    """Download a small sample CSV matching the import format."""
+    if current_user_id() is None:
+        return redirect(url_for("auth.login"))
+    sample = (
+        "Return Name,Tax Year,Return Type,Due Date,"
+        "Extended Due Date,Signer\n"
+        "John Smith,2025,1040,04/15/2026,10/15/2026,Jane Smith\n"
+        "Acme Corp,2025,1120-S,03/15/2026,,Robert Chen\n"
+        "Maria Lopez,2025,1065,04/15/2026,,Jane Smith\n"
+    )
+    return send_file(
+        io.BytesIO(sample.encode("utf-8")),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name="sample_returns.csv",
+    )
