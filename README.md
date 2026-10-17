@@ -47,13 +47,13 @@ teams that want a shared checklist-style tracker with a full audit trail.
 
 ## Screenshots
 
-### Workflow Board (Kanban View)
-
 ### Dashboard Overview
 
 ![Dashboard Overview](screenshots/main_page.png)
 
 The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
+
+### Workflow Board (Kanban View)
 
 ![Workflow Board](screenshots/kanban.png)
 
