@@ -48,14 +48,14 @@
 <div class="table-responsive">
 <table class="table">
 <tr>
-  <th>Return</th><th>Year</th><th>Type</th><th>Status</th><th>Due Date</th><th>Signer</th><th>Note</th>
+  <th>Return</th><th>Year</th><th>Type</th><th class="status-col">Status</th><th>Due Date</th><th>Signer</th><th>Note</th>
 </tr>
 {% for r in returns %}
 <tr class="{{ 'overdue' if r['effective_due'] and r['effective_due'] < today else '' }}{{ ' archived' if show_archived }}">
-  <td><a href="{{ url_for('returns.return_detail', return_id=r['id']) }}"><strong>{{ r['return_name'] }}</strong></a></td>
+  <td class="return-col"><a href="{{ url_for('returns.return_detail', return_id=r['id']) }}"><strong>{{ r['return_name'] }}</strong></a></td>
   <td class="date-col">{{ r['tax_year'] }}</td>
   <td class="type-col">{{ r['return_type'] }}</td>
-  <td><span class="badge" style="background: {{ r['stage_order']|status_color }}">{{ r['status'] }}</span></td>
+  <td class="status-col"><span class="badge" style="background: {{ r['stage_order']|status_color }}">{{ r['status'] }}</span></td>
   <td class="date-col">{{ r['effective_due'] or '' }}{{ ' OVERDUE' if r['effective_due'] and r['effective_due'] < today }}</td>
   <td class="signer-col">{{ r['signer'] or '—' }}</td>
   <td class="note-col" title="Noted {{ r['last_note_at'] or '' }}">{{ r['last_note'] or '' }}</td>
