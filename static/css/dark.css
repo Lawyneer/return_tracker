@@ -83,7 +83,7 @@ th {
 }
 
 tr.overdue td { 
-  background: #1f0f0a; 
+  background: #522416; 
 }
 
 tr.archived td { 
@@ -216,13 +216,13 @@ th.note-col, td.note-col   {
 }
 
 th.date-col, td.date-col   { 
-  width: 75px;  
-  min-width: 50px;  
-  max-width: 100px; 
+  width: 125px;  
+  min-width: 100px;  
+  max-width: 150px; 
 }
 
 th.year-col,  td.year-col  { 
-  width: 50px;  
+  width: 75px;  
   min-width: 50px;  
   max-width: 100px; 
 }
