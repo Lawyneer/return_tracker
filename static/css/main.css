@@ -1,4 +1,4 @@
-/**
+/*:
 * Template Name: iPortfolio
 * Template URL: https://bootstrapmade.com/iportfolio-bootstrap-portfolio-websites-template/
 * Updated: Jun 29 2024 with Bootstrap v5.3.3
@@ -150,7 +150,7 @@ h6 {
   left: 0;
   bottom: 0;
   padding: 0 15px;
-  width: 300px;
+  width: 250px;
   transition: all ease-in-out 0.3s;
   overflow-y: auto;
   z-index: 997;

@@ -48,7 +48,7 @@
 <div class="table-responsive">
 <table class="table">
 <tr>
-  <th>Return</th><th>Year</th><th>Type</th><th class="status-col">Status</th><th>Due Date</th><th>Signer</th><th>Note</th>
+  <th>Return</th><th class="year-col">Year</th><th>Type</th><th class="status-col">Status</th><th class="date-col">Due Date</th><th>Signer</th><th>Note</th>
 </tr>
 {% for r in returns %}
 <tr class="{{ 'overdue' if r['effective_due'] and r['effective_due'] < today else '' }}{{ ' archived' if show_archived }}">

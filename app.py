@@ -8,7 +8,7 @@ from db import close_db, init_db
 from helpers import register_template_helpers
 from auth import auth_bp
 from returns import returns_bp
-
+import logging
 
 def create_app(config_object=Config):
     """Build and configure the Flask application."""
@@ -27,6 +27,7 @@ def create_app(config_object=Config):
 
 
 if __name__ == "__main__":
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
     app = create_app()
     # host="0.0.0.0" makes it reachable from other machines on your LAN.
     app.run(host="0.0.0.0", port=5000, debug=False)
