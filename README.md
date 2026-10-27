@@ -17,6 +17,38 @@ A lightweight, single-database web application for tracking the status of tax re
 - **Dark/light theme** toggle, remembered per session.
 - **Security**: argon2id password hashing, enforced password policy, CSRF protection on all forms, hardened session cookies, and persistent brute-force lockout (username and IP) after five failed logins.
 
+## Screenshots
+
+### Dashboard Overview
+
+![Dashboard Overview](screenshots/main_page.png)
+
+The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
+
+### Workflow Board (Kanban View)
+
+![Workflow Board](screenshots/kanban.png)
+
+The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and signer.
+
+### Return Detail Page
+
+![Return Detail Page](screenshots/detail_page.png)
+
+Each return's detail page includes status change controls, due date and signer editing, the full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
+
+### Import CSV Guide
+
+![Import CSV Guide](screenshots/import_guide.png)
+
+The Import CSV Guide page pairs the bulk-upload form with complete documentation of the expected file format — required and optional columns, accepted date formats, and header-matching rules — along with a downloadable sample file to start from.
+
+### Login
+
+![Login](screenshots/login.png)
+
+Sign-in requires a username (email address or alphanumeric name) and a password. Accounts are provisioned by an administrator — there is no self-registration.
+
 ## Requirements
 
 - Python 3.10+
