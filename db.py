@@ -32,7 +32,7 @@ def init_db():
     db.executescript("""
     CREATE TABLE IF NOT EXISTS users (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        username    TEXT NOT NULL UNIQUE,
+        username    TEXT NOT NULL UNIQUE COLLATE NOCASE,
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE TABLE IF NOT EXISTS statuses (
@@ -65,6 +65,17 @@ def init_db():
     );
     CREATE INDEX IF NOT EXISTS idx_hist_return ON status_history(return_id, changed_at);
     CREATE INDEX IF NOT EXISTS idx_returns_status ON tax_returns(current_status_id);
+
+    -- Security additions ------------------------------------------------
+    CREATE TABLE IF NOT EXISTS failed_attempts (
+        lock_key        TEXT PRIMARY KEY,
+        count           INTEGER NOT NULL DEFAULT 0,
+        last_attempt_at TIMESTAMP NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS lockouts (
+        lock_key  TEXT PRIMARY KEY,
+        locked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     """)
     # Migrations for databases created before newer features existed.
     cols = [r["name"] for r in db.execute("PRAGMA table_info(tax_returns)").fetchall()]
@@ -75,9 +86,22 @@ def init_db():
     hist_cols = [r["name"] for r in db.execute("PRAGMA table_info(status_history)").fetchall()]
     if "change_type" not in hist_cols:
         db.execute("ALTER TABLE status_history ADD COLUMN change_type TEXT")
-    # Existing history rows were all status changes; label them so the
-    # history display stays consistent after the migration.
     db.execute("UPDATE status_history SET change_type='status' WHERE change_type IS NULL")
+
+    # --- password migration --------------------------------------------
+    # Users table gets a nullable password_hash column. Existing users
+    # remain in place but cannot log in until an admin sets a password
+    # via:  python manage_users.py set-password <username>
+    user_cols = [r["name"] for r in db.execute("PRAGMA table_info(users)").fetchall()]
+    if "password_hash" not in user_cols:
+        db.execute("ALTER TABLE users ADD COLUMN password_hash TEXT")
+
+    # Case-insensitive unique usernames (re-creating users is not possible
+    # with ALTER TABLE, but SQLite's default NOCASE handles equality; the
+    # COLLATE NOCASE above is applied to fresh databases, and lookups are
+    # always done with COLLATE NOCASE queries for existing ones.)
+    # ------------------------------------------------------------------
+
     # Seed the fixed workflow statuses (no-op if they already exist).
     for code, label, order in STATUSES:
         db.execute("INSERT OR IGNORE INTO statuses (code, label, stage_order) VALUES (?,?,?)",

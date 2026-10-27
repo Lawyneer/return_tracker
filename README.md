@@ -2,309 +2,145 @@
 
 [![CI](https://github.com/Lawyneer/return_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Lawyneer/return_tracker/actions/workflows/ci.yml)
 
-A lightweight, single-database web application for tracking the status
-of tax returns through not started all the way completion via e-file
-confirmation. Built with Flask and SQLite and designed for small firms or
-teams that want a shared checklist-style tracker with a full audit trail.
+A lightweight, single-database web application for tracking the status of tax returns through preparation and review — who's working on what, where each return sits in the pipeline, what's overdue, and a complete audit trail of every change. Built for small teams (a handful of users) that need a simple, auditable pipeline view without the weight of a full practice-management platform.
 
 ## Features
 
-- **Workflow stage tracking** — return status progresses through various
-  workflow stages (configurable per deployment), with dashboard counts,
-  a kanban board, and filtering by any combination of status, return type,
-  and signer.
-- **Signer tracking** — each return records a signer (set at creation or any
-  time later), shown on the list, board, and detail pages, filterable in both
-  views, and included in the CSV export
-- **Full audit trail** — every status change *and every signer or due-date
-  edit* is timestamped, attributed to a user, and labeled by change type,
-  with optional notes on status changes
-- **Dashboard overview** — at-a-glance count of returns in each workflow stage
-- **Kanban workflow board** — a board view grouping active returns into
-  four columns (Not Started, Preparing, In Review, Completed) with
-  per-column counts, filterable by return type and signer, searchable by name
-- **Overdue highlighting** — returns past their effective due date (extended due
-  date if set) are flagged automatically
-- **Soft archiving** — completed returns can be archived and later restored,
-  with history preserved
-- **Filtering & search** — filter by status, return type, or signer, plus
-  search by name
-- **CSV export** — download active or archived returns as a spreadsheet,
-  including the signer
-- **CSV import** — bulk-add returns from a spreadsheet; only Return Name,
-  Tax Year, and Return Type are required (see
-  [CSV Import](#csv-import)); a ready-to-edit template ships with the repo
-  (`import_template.csv`)
-  - **Import CSV Guide page** — the upload form and complete format
-  documentation live on a dedicated "Import CSV Guide" page reachable
-  from the sidebar, with a downloadable sample file
-- **Dual themes** — dark mode (default) and light mode
-- **Tested** — pytest suite covering login, the audit trail (status changes
-  and signer/due-date edits), signer handling, CSV import and export,
-  archiving, and filtering, run automatically in CI
-- **Zero external services** — single SQLite database file, no server setup,
-  no accounts or passwords to manage (a password login is planned, see [Roadmap](#roadmap))
+- **9-stage workflow** from "Not Started" to "E-File Forms Uploaded – Complete", with free backward movement and a red-to-green status badge gradient so progress is visible at a glance.
+- **Kanban board** (`/board`) grouping active returns into four workflow columns (Not Started, Preparing, In Review, Completed) with per-column counts, filterable by type, signer, and name search.
+- **Full audit trail**: every status change, signer edit, and due-date edit is logged with the old/new values, who made the change, and a timestamp. The history table on each return's detail page distinguishes Status, Signer, and Due Date entries.
+- **Due-date tracking** with extensions and automatic OVERDUE highlighting based on the effective (extended-if-set) due date.
+- **Signer assignment** per return, with case-insensitive filtering by signer on both the list and board views.
+- **Soft archive/restore** that hides a return from active views while preserving its entire history.
+- **CSV export** of active or archived returns with dated filenames.
+- **CSV bulk import** with forgiving header matching (case/punctuation insensitive, Excel BOM handled), per-row validation and error reporting, duplicate skipping, and status import by code or label.
+- **Dark/light theme** toggle, remembered per session.
+- **Security**: argon2id password hashing, enforced password policy, CSRF protection on all forms, hardened session cookies, and persistent brute-force lockout (username and IP) after five failed logins.
 
-## Screenshots
+## Requirements
 
-### Dashboard Overview
+- Python 3.10+
+- A Linux/Unix host for production deployments (nginx + gunicorn + systemd, per the deployment notes below)
 
-![Dashboard Overview](screenshots/main_page.png)
+Runtime dependencies: Flask, Flask-WTF, argon2-cffi (see `requirements.txt`).
 
-The dashboard provides at-a-glance status counts for each workflow stage, followed by a filterable table view of all active returns.
+## Quick start (local development)
 
-### Workflow Board (Kanban View)
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+export TAX_TRACKER_SECRET="any-random-string-for-local-dev"
+python app.py
+```
 
-![Workflow Board](screenshots/kanban.png)
+Then open http://localhost:5000.
 
-The kanban board groups active returns into four columns — Not Started, Preparing, In Review, Completed — with per-column counts, clickable cards, and filtering by return type and signer.
+The app refuses to start without `TAX_TRACKER_SECRET` — this is intentional, so a misconfigured deployment fails loudly instead of silently generating an insecure ephemeral key.
 
-### Return Detail Page
+### Creating users
 
-![Return Detail Page](screenshots/detail_page.png)
+There is no self-registration. An administrator creates accounts and sets passwords via the CLI:
 
-Each return's detail page includes status change controls, due date and signer editing, the full audit history, and archiving options. The status dropdown pre-selects the current status for note-only updates.
+```bash
+venv/bin/python manage_users.py add jane@example.com
+```
 
-### Import CSV Guide
+Subcommands:
 
-![Import CSV Guide](screenshots/import_guide.png)
+| Command | Purpose |
+|---------|---------|
+| `add <username>` | Create a user (prompts for a hidden password) |
+| `set-password <username>` | Set/reset a password (also unlocks legacy pre-v2.0.0 users) |
+| `list` | Show users and whether each has a password |
+| `lock-status` | Show active lockouts and failed-attempt counters |
+| `reset-lockouts` | Clear all lockouts and failure counters (admin unlock) |
 
-The Import CSV Guide page pairs the bulk-upload form with complete documentation of the expected file format — required and optional columns, accepted date formats, and header-matching rules — along with a downloadable sample file to start from.
+Usernames are either an email address or a 3–64 character alphanumeric/underscore name. Passwords must be 20–100 characters with at least one lowercase letter, one uppercase letter, one digit, and one standard ASCII special character.
 
-## Supported Return Types
+### Lockout policy
 
-1040, 1041, 1065, 1120, 1120-S, 990, 990-PF, 990-T, 706, 709, State, Other
+After five failed login attempts, both the affected username and the client IP are locked. Lockouts are stored in the database and survive application and server restarts; they are only cleared by an administrator running `manage_users.py reset-lockouts`. A successful login clears the user's own failure counter, but the IP counter is cumulative by design — there is no self-serve unlock path.
 
-## Project Structure
+## Running the tests
 
+```bash
+pytest
+```
+
+Tests run against a throwaway per-test SQLite database in a temporary directory; your local data is never touched. The suite takes ~25 seconds, mostly due to real argon2 verification in the lockout tests.
+
+## Production deployment (summary)
+
+The supported topology is nginx (TLS termination) → gunicorn (bound to 127.0.0.1) → Flask, with gunicorn managed by systemd:
+
+1. Install dependencies into a virtualenv, including gunicorn.
+2. Generate a strong secret: `python -c "import secrets; print(secrets.token_hex(32))"` and provide it to the service via an `EnvironmentFile=` (chmod 600).
+3. Create a systemd unit running: `gunicorn --workers 2 --bind 127.0.0.1:5000 "app:create_app()"` with `WorkingDirectory` set to the project directory.
+4. Configure nginx to proxy the (sub)domain to 127.0.0.1:5000, passing `X-Forwarded-For` (required for correct lockout IP tracking; the app applies `ProxyFix` for a single proxy hop) and a `client_max_body_size` large enough for CSV imports (e.g., 10M).
+5. Issue a TLS certificate (e.g., certbot) and serve only over HTTPS — the shipped `Config` sets `SESSION_COOKIE_SECURE`.
+6. Provision users with `manage_users.py` and back up `tax_returns.db` regularly — it is the only stateful component: `sqlite3 tax_returns.db ".backup backup-$(date +%F).db"`
+
+## Project structure
 ```text
 return_tracker/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml          # GitHub Actions: pytest on Python 3.10–3.12
+│       └── ci.yml
 ├── templates/
 │   ├── base.html
 │   ├── board.html
 │   ├── detail.html
-│   ├── import_info.html    # Import CSV Guide (upload form + docs)
+│   ├── import_info.html
 │   ├── index.html
 │   ├── login.html
 │   └── new_return.html
 ├── static/
-│   └── css/
-│   |   ├── dark.css
-│   │   ├── layout.css      # Structural rules (sticky footer)
-│   |   ├── light.css
+│   ├── css/
+│   │   ├── dark.css
+│   │   ├── layout.css
+│   │   ├── light.css
 │   │   ├── main.css
-│   |   └── sidebar.scc     # Sidebar styling (theme-independent)
-│   ├── js/                 # Template JavaScript
+│   │   └── sidebar.css
+│   ├── js/
 │   └── vendor/             # Bootstrap, AOS, Bootstrap Icons, etc.
 ├── tests/
-│   ├── conftest.py         # Shared fixtures (temp database, client, user)
-│   ├── test_auth.py        # Login flow, access control, theme toggle
-│   ├── test_returns.py     # Creation, validation, status changes, history, form details
-│   ├── test_board.py       # Kanban board: columns, counts, filters
+│   ├── conftest.py
+│   ├── test_auth.py
+│   ├── test_returns.py
+│   ├── test_board.py
 │   ├── test_dashboard_archive_export.py
-│   └── test_signer_audit_import.py  # Signer field, change_type audit trail, CSV import
-├── app.py                  # Application factory + entry point
-├── auth.py                 # Blueprint: login / logout / theme toggle
-├── config.py               # Configuration (secret key, DB path)
-├── constants.py            # Return types and workflow status definitions
-├── db.py                   # SQLite connection handling & schema
-├── helpers.py              # Shared utilities, template context, Jinja filters
-├── returns.py              # Blueprint: return CRUD, archive, CSV import/export
-├── import_template.csv     # Sample CSV for the bulk import
-├── screenshots/            # Images referenced by the README
+│   ├── test_security_auth.py
+│   └── test_signer_audit_import.py
+├── app.py
+├── auth.py
+├── config.py
+├── constants.py
+├── db.py
+├── helpers.py
+├── manage_users.py
+├── returns.py
+├── security.py
+├── import_template.csv
+├── screenshots/
 │   ├── kanban.png
 │   ├── main_page.png
-│   └── detail_page.png
-├── .gitattributes          # Line-ending normalization; DB treated as binary
-├── CONTRIBUTING.md         # How to contribute
-├── pytest.ini              # Test runner configuration
-├── requirements.txt        # Runtime dependencies
-├── requirements-dev.txt    # Development dependencies (pytest)
-└── tax_returns.db          # SQLite database (created on first run, not committed)
+│   ├── detail_page.png
+│   └── import_guide.png
+├── .env                    # Local secret (never committed; gitignored)
+├── .gitattributes
+├── .gitignore
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── pytest.ini
+├── requirements.txt
+├── requirements-dev.txt
+└── tax_returns.db
 ```
 
-## Getting Started
+## Data storage
 
-### Prerequisites
-
-- Python 3.10+
-- Flask
-
-### Setup
-
-**1. Create and activate a virtual environment**
-
-Keeping dependencies in a virtual environment avoids conflicts with your
-system's Python packages and makes the project portable:
-
-```bash
-# From the project root
-python3 -m venv venv
-
-# Activate it:
-# Linux / macOS
-source venv/bin/activate
-# Windows (PowerShell)
-.\venv\Scripts\Activate.ps1
-```
-
-**2. Install dependencies**
-
-```bash
-pip install -r requirements.txt
-```
-
-(For development, also install the test dependencies — see
-[Testing](#testing) below.)
-
-**3. Run the app**
-
-```bash
-python app.py
-```
-
-The app starts on `http://0.0.0.0:5000`, making it reachable from other
-machines on your local network. Open `http://localhost:5000` in your browser,
-add yourself as a user, and start adding returns.
-
-To deactivate the virtual environment when you're done:
-
-```bash
-deactivate
-```
-
-### First-Time Use
-
-1. On the login page, add your name under **Add a new user**
-2. Select your name from the dropdown and sign in
-3. Click **+ Add Return** to create your first tax return (optionally with a
-   signer and due dates)
-4. Open a return to change its status, add notes, or edit due dates and the
-   signer
-5. Open the **Kanban Board** from the left sidebar for the four-column
-   overview of where every return stands
-6. Have a spreadsheet of returns ready? Use the **Import CSV Guide**
-   link in the sidebar to upload it
-
-## CSV Import
-
-The sidebar's **Import CSV Guide** page includes the upload form and
-complete format documentation, plus a downloadable sample file.
-Columns are matched by header name, case and punctuation insensitive,
-and a UTF-8 BOM (typical of Excel exports) is handled automatically.
-
-Required columns:
-
-- **Return Name**
-- **Tax Year**
-- **Return Type**
-
-Optional columns:
-
-- **Due Date** / **Extended Due Date** — `YYYY-MM-DD` or `MM/DD/YYYY`
-- **Signer** — free text
-- **Status** — either the status code (`with_preparer`) or the label
-  (`In Preparation`); blank defaults to "Not Started"
-
-Rows are validated and committed individually: valid rows are inserted,
-rows duplicating an existing return (same name, year, and type) are skipped,
-and invalid rows are rejected with a reason. A summary at the top of the
-page reports the outcome. A starter template,
-[`import_template.csv`](import_template.csv), is included in the repo.
-
-## Testing
-
-The test suite uses pytest with an isolated, throwaway SQLite database per
-test — your local `tax_returns.db` is never touched.
-
-```bash
-pip install -r requirements-dev.txt
-pytest
-```
-
-The suite covers the login flow, return creation and validation, the full
-status-change audit trail (who, when, and any note), backward status moves,
-dashboard counting, the kanban board's column grouping and count, archiving/
-restoring, filtering, and CSV export.
-
-CI runs the suite on Python 3.10–3.12 for every push and pull request —
-see the badge at the top of this page.
-
-## Contributing
-
-Bug reports, feature ideas, and pull requests are welcome! See
-[CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, coding
-guidelines, and the pull-request checklist.
-
-## Configuration
-
-Both settings can be overridden with environment variables:
-
-| Setting | Default | Environment Variable |
-|---|---|---|
-| Secret key | Randomly generated at startup | `TAX_TRACKER_SECRET` |
-| Database path | `./tax_returns.db` | `TAX_TRACKER_DB` |
-
-Setting a fixed `TAX_TRACKER_SECRET` is recommended for production so user
-sessions survive app restarts.
-
-## Backups & Data
-
-All data lives in a single SQLite file (`tax_returns.db`). To back up, simply
-copy that file while the app is stopped. To reset, delete the file — the schema
-and default statuses are recreated on next launch.
-
-Existing databases from earlier versions of this app are migrated
-automatically (`archived_at`, `signer`, and status-history `change_type`
-columns are added if missing; existing history rows are back-filled as
-status changes).
-
-## Security Notes
-
-This app uses **passwordless, name-based login**: anyone who can reach the app
-can sign in as any user. It is designed for a **trusted internal network**, not
-public internet exposure.
-
-Before exposing it beyond a private LAN, consider:
-
-- Putting it behind a VPN or reverse proxy with authentication
-- Adding real password-based authentication
-- Serving over HTTPS
-
-Password authentication, login rate limiting, and CSRF protection are
-planned — see [Roadmap](#roadmap). Until they ship, treat this app as
-insecure on any network you don't fully control.
-
-## Roadmap
-
-These are the final planned features for the project — once they ship,
-the app is considered feature-complete.
-
-- **Assignment of returns to users** — assign a preparer or reviewer to
-  each return, changeable during a status update or on its own, with
-  every reassignment recorded in the status history
-- **Pipeline statistics** — time spent at each workflow status and a
-  per-user count of status moves, computed from the existing audit trail
-- **Database backup download** — a consistent SQLite snapshot taken via
-  SQLite's online backup API, safe to run while the app is serving requests
-- **Password authentication** — replace the current passwordless,
-  name-based login: passwords stored salted and hashed (Werkzeug
-  PBKDF2), existing users prompted to set a password on first login
-  after the upgrade
-- **Login rate limiting** — temporary lockout after repeated failed
-  attempts on the same username
-- **CSRF protection** — token protection on all forms and hardened
-  session cookies (`HttpOnly`, `SameSite=Lax`), in preparation for
-  internet-facing deployments
-
-The last three are related hardening work that would ship together, and
-together they would make the app safe to expose beyond a trusted network.
-Until then, the [security notes](#security-notes) apply.
-
-See [CHANGELOG.md](CHANGELOG.md) for what has already been released.
+A single SQLite database (`tax_returns.db`, path overridable via `TAX_TRACKER_DB`) holds users, statuses, returns, the audit-trail history, and the lockout tables. The schema is created on first run and migrated in place (new columns added as nullable; existing data never touched).
 
 ## License
 

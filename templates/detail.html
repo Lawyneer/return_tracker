@@ -12,6 +12,7 @@
 
 <h2>Change status</h2>
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="action" value="change_status">
   <select name="new_status_id" class="form-select form-select-sm d-inline-block w-auto">
     {% for s in statuses %}
@@ -27,6 +28,7 @@
 
 <h2>Edit due dates</h2>
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="action" value="update_dates">
   <label class="form-label">Due date</label>
   <input name="due_date" class="form-control w-auto d-inline-block" value="{{ r['due_date'] or '' }}" placeholder="YYYY-MM-DD">
@@ -37,6 +39,7 @@
 
 <h2>Edit signer</h2>
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <input type="hidden" name="action" value="update_signer">
   <label class="form-label">Signer name</label>
   <input name="signer" class="form-control w-auto d-inline-block" value="{{ r['signer'] or '' }}" size="40"
@@ -62,8 +65,8 @@
 </div>
 
 <h2>Danger zone</h2>
-{# Soft delete: hides the return but preserves its full history #}
 <form method="post" action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% if r['archived_at'] %}
   <input type="hidden" name="archive_action" value="unarchive">
   <button type="submit" class="btn btn-sm btn-outline-secondary">Restore this return to active</button>

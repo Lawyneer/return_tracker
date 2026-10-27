@@ -59,6 +59,7 @@
       {% if show_archived %}
       <form method="post" class="inline"
             action="{{ url_for('returns.archive_return', return_id=r['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="archive_action" value="unarchive">
         <button type="submit" class="btn btn-sm btn-outline-secondary">Restore</button>
       </form>

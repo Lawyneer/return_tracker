@@ -6,12 +6,6 @@ from tests.conftest import add_return, return_id, status_id
 
 # ---------------------------- signer field ----------------------------------
 
-def test_signer_set_at_creation_shown_on_list_and_detail(alice, client):
-    add_return(client, name="Signed Corp", signer="Jane Smith")
-    list_page = client.get("/")
-    assert b"Jane Smith" in list_page.data
-
-    rid = return_id(None, "Signed Corp") if False else None  # placeholder, replaced below
 def test_signer_set_at_creation(alice, client, db):
     add_return(client, name="Signed Corp", signer="Jane Smith")
     rid = return_id(db, "Signed Corp")

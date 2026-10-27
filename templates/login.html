@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — Tax Return Tracker</title>
+  <title>Login — Tax Return Status Tracker</title>
 
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
@@ -16,23 +16,24 @@
 </head>
 <body class="auth-page">
 <main class="auth-card">
+  {% with msgs = get_flashed_messages() %}
+  {% if msgs %}
+    <div class="flashes">
+      {% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
   <h1>Tax Return Status Tracker</h1>
-  <h2>Select your name</h2>
-  <form method="post">
-    <input type="hidden" name="action" value="login">
-    <select name="user_id">
-      <option value="">-- choose user --</option>
-      {% for u in users %}
-      <option value="{{ u['id'] }}">{{ u['username'] }}</option>
-      {% endfor %}
-    </select>
+  <h2>Sign in</h2>
+  <form method="post" autocomplete="off">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="username">Username or email</label>
+    <input type="text" id="username" name="username"
+           autocomplete="username" autofocus required>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password"
+           autocomplete="current-password" required>
     <button type="submit">Sign in</button>
-  </form>
-  <h2>Add a new user</h2>
-  <form method="post">
-    <input type="hidden" name="action" value="add_user">
-    <input name="new_username" placeholder="Name">
-    <button type="submit">Add</button>
   </form>
 </main>
 </body>

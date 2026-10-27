@@ -1,10 +1,8 @@
 """Domain constants shared across modules."""
+import string
 
-# Allowed return types offered in the "Add Return" form.
 RETURN_TYPES = ["1040", "1041", "1065", "1120", "1120-S", "990", "990-PF", "990-T", "706", "709", "State", "Other"]
 
-# Workflow statuses: (code, human-readable label, pipeline stage order).
-# stage_order drives sorting and the red->green badge coloring.
 STATUSES = [
     ("not_started",          "Not Started",                               1),
     ("docs_requested",       "Documents Requested",                       2),
@@ -17,8 +15,6 @@ STATUSES = [
     ("complete",             "E-File Forms Uploaded - Complete",          9),
 ]
 
-# Kanban dashboard columns: (column title, status codes in that column).
-# Codes refer to the STATUSES tuples above.
 KANBAN_COLUMNS = [
     ("Not Started", ["not_started", "docs_requested"]),
     ("Preparing",   ["with_preparer", "docs_waiting"]),
@@ -27,3 +23,18 @@ KANBAN_COLUMNS = [
 ]
 
 DEFAULT_THEME = "dark"
+
+# ---------------------------- security settings -----------------------------
+
+MIN_PASSWORD_LENGTH = 20
+MAX_PASSWORD_LENGTH = 100
+
+# Standard ASCII punctuation only (string.punctuation):
+# !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+PASSWORD_SPECIAL_CHARS = set(string.punctuation)
+
+# After this many consecutive failures, BOTH the username key and the IP
+# key are locked until an administrator runs `manage_users.py reset-lockouts`.
+MAX_LOGIN_ATTEMPTS = 5
+
+USERNAME_MAX_LEN = 254
