@@ -102,6 +102,21 @@ pytest
 
 Tests run against a throwaway per-test SQLite database in a temporary directory; your local data is never touched. The suite takes ~25 seconds, mostly due to real argon2 verification in the lockout tests.
 
+## Configuration
+
+| Setting | Default | Environment Variable |
+|---------|---------|----------------------|
+| Secret key | **None — required. App exits without it** | `TAX_TRACKER_SECRET` |
+| Database path | `./tax_returns.db` | `TAX_TRACKER_DB` |
+
+`TAX_TRACKER_SECRET` signs session cookies and CSRF tokens. Generate one
+with `python -c "import secrets; print(secrets.token_hex(32))"` and supply
+it via environment variable (or systemd `EnvironmentFile=` in production).
+Changing it invalidates all existing sessions. Never commit it.
+
+`TAX_TRACKER_DB` lets you point the app at a different SQLite file — useful
+for running a second instance against test data.
+
 ## Production deployment (summary)
 
 The supported topology is nginx (TLS termination) → gunicorn (bound to 127.0.0.1) → Flask, with gunicorn managed by systemd:
@@ -158,6 +173,7 @@ return_tracker/
 │   ├── kanban.png
 │   ├── main_page.png
 │   ├── detail_page.png
+│   ├── login.png
 │   └── import_guide.png
 ├── .env                    # Local secret (never committed; gitignored)
 ├── .gitattributes
@@ -173,6 +189,19 @@ return_tracker/
 ## Data storage
 
 A single SQLite database (`tax_returns.db`, path overridable via `TAX_TRACKER_DB`) holds users, statuses, returns, the audit-trail history, and the lockout tables. The schema is created on first run and migrated in place (new columns added as nullable; existing data never touched).
+
+## Roadmap
+
+These are the remaining planned features for the project:
+
+- **Assignment of returns to users** — assign a preparer or reviewer to each return, changeable during a status update or on its own, with every reassignment recorded in the status history
+- **Pipeline statistics** — time spent at each workflow status and a per-user count of status moves, computed from the existing audit trail
+- **Database backup download** — a consistent SQLite snapshot taken via SQLite's online backup API, safe to run while the app is serving requests
+
+Password authentication, login lockout, and CSRF protection were planned here
+once too — they shipped in [v2.0.0](CHANGELOG.md), which is what makes the
+app safe for internet-facing deployment. See [CHANGELOG.md](CHANGELOG.md)
+for everything already released.
 
 ## License
 
